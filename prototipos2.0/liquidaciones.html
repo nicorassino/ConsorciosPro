@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ConsorciosPro - Liquidaciones</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: { 900: '#1E3A5F', 800: '#244970' },
+                        accent: { 500: '#059669', 600: '#047857' }
+                    },
+                    fontFamily: { sans: ['Inter', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #F3F4F6; }
+        .glass-card { background: rgba(255,255,255,0.97); border: 1px solid rgba(0,0,0,0.06); }
+        .method-btn { padding: 5px 12px; border-radius: 6px; font-size: 11px; font-weight: 700; cursor: pointer; border: 1.5px solid transparent; transition: all 0.15s; }
+        .method-btn.active-coef { background: #dbeafe; color: #1e40af; border-color: #93c5fd; }
+        .method-btn.active-igual { background: #f3e8ff; color: #6b21a8; border-color: #d8b4fe; }
+        .method-btn.active-manual { background: #fef3c7; color: #92400e; border-color: #fde68a; }
+        .method-btn:not(.active-coef):not(.active-igual):not(.active-manual) { background: #f9fafb; color: #6b7280; border-color: #e5e7eb; }
+        .method-btn:hover:not(.active-coef):not(.active-igual):not(.active-manual) { background: #f3f4f6; border-color: #d1d5db; }
+
+        .excl-check { width: 16px; height: 16px; accent-color: #dc2626; cursor: pointer; }
+        .excl-row { transition: all 0.2s; }
+        .excl-row.excluded td { opacity: 0.4; text-decoration: line-through; background: #fef2f2; }
+
+        .cupon-card { border: 2px dashed #d1d5db; border-radius: 16px; background: white; padding: 20px; position: relative; overflow: hidden; }
+        .cupon-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 6px; background: repeating-linear-gradient(90deg, white, white 4px, var(--cp-color, #1E3A5F) 4px, var(--cp-color, #1E3A5F) 8px); }
+
+        .result-row td { transition: background 0.2s; }
+
+        .pill-ord { background:#d1fae5; color:#065f46; font-size:10px; font-weight:700; padding:1px 6px; border-radius:999px; }
+        .pill-ext { background:#fef3c7; color:#92400e; font-size:10px; font-weight:700; padding:1px 6px; border-radius:999px; }
+
+        .tab-btn { padding: 8px 20px; font-weight: 600; font-size: 13px; border-radius: 8px; cursor: pointer; transition: all 0.15s; }
+        .tab-btn.active { background: #1E3A5F; color: white; }
+        .tab-btn:not(.active) { background: white; color: #6b7280; border: 1px solid #e5e7eb; }
+        .tab-btn:not(.active):hover { border-color: #d1d5db; color: #374151; }
+
+        .manual-input { width: 60px; border: 1px solid #e5e7eb; border-radius: 4px; padding: 2px 4px; text-align: center; font-size: 12px; outline: none; background: #f9fafb; transition: all 0.15s; }
+        .manual-input:focus { border-color: #d97706; background: white; box-shadow: 0 0 0 2px rgba(217,119,6,0.15); }
+        .manual-valid { border-color: #10b981 !important; background: #f0fdf4 !important; }
+        .manual-error { border-color: #ef4444 !important; background: #fef2f2 !important; }
+
+        .anim-in { animation: sIn 0.3s ease; }
+        @keyframes sIn { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:none} }
+        .fade-badge { animation: fbIn 0.3s ease; }
+        @keyframes fbIn { from{opacity:0;transform:scale(0.8)} to{opacity:1;transform:scale(1)} }
+    </style>
+</head>
+<body class="text-gray-800 antialiased flex h-screen overflow-hidden">
+
+<!-- Sidebar -->
+<aside class="w-60 bg-primary-900 text-white flex flex-col shadow-2xl flex-shrink-0 z-20 hidden md:flex">
+    <div class="p-5 flex items-center justify-center border-b border-white/10">
+        <div class="flex flex-col items-center">
+            <div class="h-10 w-10 bg-white rounded-lg flex items-center justify-center mb-2 shadow text-primary-900 font-bold text-xl">CP</div>
+            <h1 class="text-lg font-bold text-white">Consorcios<span class="text-accent-500">Pro</span></h1>
+        </div>
+    </div>
+    <div class="p-4 flex-1">
+        <nav class="space-y-1">
+            <a href="index.html" class="flex items-center gap-3 px-3 py-2 text-gray-300 hover:bg-white/10 hover:text-white rounded-lg transition-colors text-sm"><i class="fas fa-home w-4"></i> Dashboard</a>
+            <a href="consorcios.html" class="flex items-center gap-3 px-3 py-2 text-gray-300 hover:bg-white/10 hover:text-white rounded-lg transition-colors text-sm"><i class="fas fa-building w-4"></i> Consorcios</a>
+            <a href="departamentos.html" class="flex items-center gap-3 px-3 py-2 text-gray-300 hover:bg-white/10 hover:text-white rounded-lg transition-colors text-sm"><i class="fas fa-door-open w-4"></i> Unidades</a>
+            <div class="pt-4 pb-1"><p class="text-[10px] font-bold text-gray-500 uppercase tracking-wider px-3">Finanzas</p></div>
+            <a href="presupuestos.html" class="flex items-center gap-3 px-3 py-2 text-gray-300 hover:bg-white/10 hover:text-white rounded-lg transition-colors text-sm"><i class="fas fa-calculator w-4"></i> Presupuestos</a>
+            <a href="liquidaciones.html" class="flex items-center gap-3 px-3 py-2 bg-accent-600/25 text-accent-500 border-r-4 border-accent-500 rounded-lg text-sm font-semibold"><i class="fas fa-file-invoice-dollar w-4"></i> Liquidaciones</a>
+        </nav>
+    </div>
+    
+    <div class="p-4 border-t border-primary-800/50 bg-primary-800/20 flex justify-center">
+        <img src="../img/logo_cliente.png" alt="Oliva Administraciones" class="h-20 w-auto max-w-[95%] object-contain bg-white rounded-xl p-3 shadow-sm hover:scale-105 transition-transform">
+    </div>
+</aside>
+
+<!-- Main -->
+<div class="flex-1 flex flex-col h-screen overflow-hidden">
+    <header class="bg-white shadow-sm z-10 border-b border-gray-100">
+        <div class="flex items-center justify-between px-6 py-3">
+            <div>
+                <h2 class="text-xl font-bold text-gray-800">Liquidación de Expensas</h2>
+                <p class="text-xs text-gray-500">Edificio San Martín · Abril 2026 · 5 Unidades · Presup. Finalizado</p>
+            </div>
+            <div class="flex items-center gap-3">
+                <button onclick="calcularLiquidacion()" class="bg-accent-600 hover:bg-accent-700 text-white px-5 py-2 rounded-lg font-bold text-sm transition-all shadow flex items-center gap-2 hover:shadow-md hover:-translate-y-0.5">
+                    <i class="fas fa-magic"></i> Calcular Liquidación
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Tabs -->
+    <div class="bg-white border-b border-gray-200 px-6">
+        <div class="flex gap-2 py-3">
+            <button class="tab-btn active" id="tab-config" onclick="switchTab('config')">
+                <i class="fas fa-sliders-h mr-1.5"></i> 1. Configurar Conceptos
+            </button>
+            <button class="tab-btn" id="tab-resultado" onclick="switchTab('resultado')">
+                <i class="fas fa-table mr-1.5"></i> 2. Resultado por Unidad
+            </button>
+            <button class="tab-btn" id="tab-cupones" onclick="switchTab('cupones')">
+                <i class="fas fa-receipt mr-1.5"></i> 3. Cupones de Pago
+            </button>
+        </div>
+    </div>
+
+    <main class="flex-1 overflow-y-auto p-5 bg-gray-50">
+        <div class="max-w-7xl mx-auto space-y-5">
+            
+            <!-- TAB 1: CONFIGURAR CONCEPTOS -->
+            <div id="panel-config">
+                <!-- Global Method Selector -->
+                <div class="glass-card rounded-xl shadow-sm p-4 mb-4 flex flex-wrap items-center gap-4 bg-white">
+                    <span class="font-semibold text-gray-700 text-sm">Aplicar a TODOS:</span>
+                    <button onclick="setGlobalMethod('coeficiente')" class="method-btn active-coef">📐 Por Coeficiente</button>
+                    <button onclick="setGlobalMethod('partes_iguales')" class="method-btn">⚖️ Partes Iguales</button>
+                    <div class="flex items-center gap-2 ml-auto text-xs text-gray-500">
+                        <i class="fas fa-info-circle text-blue-400"></i>
+                        Podés cambiar el método individualmente por concepto
+                    </div>
+                </div>
+
+                <!-- Concepts Config Table -->
+                <div id="config-table-container" class="space-y-3">
+                    <!-- Rendered by JS -->
+                </div>
+            </div>
+
+            <!-- TAB 2: RESULTADO POR UNIDAD -->
+            <div id="panel-resultado" class="hidden">
+                <div id="resultado-placeholder" class="glass-card rounded-xl p-12 text-center text-gray-400 anim-in">
+                    <i class="fas fa-table text-4xl mb-3 text-gray-300"></i>
+                    <p class="font-medium text-gray-500">Configurá los conceptos y hacé clic en <strong class="text-accent-600">Calcular Liquidación</strong></p>
+                </div>
+                <div id="resultado-content" class="hidden">
+                    <!-- Summary Cards -->
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-5">
+                        <div class="bg-white rounded-xl p-4 shadow-sm border-t-4 border-emerald-500">
+                            <p class="text-xs text-gray-500 uppercase font-semibold">Total a Recaudar</p>
+                            <p id="res-total" class="text-xl font-bold font-mono text-gray-800 mt-1">-</p>
+                        </div>
+                        <div class="bg-white rounded-xl p-4 shadow-sm border-t-4 border-blue-400">
+                            <p class="text-xs text-gray-500 uppercase font-semibold">Ordinario (Inq.)</p>
+                            <p id="res-ord" class="text-xl font-bold font-mono text-gray-800 mt-1">-</p>
+                        </div>
+                        <div class="bg-white rounded-xl p-4 shadow-sm border-t-4 border-amber-400">
+                            <p class="text-xs text-gray-500 uppercase font-semibold">Extraordinario (Prop.)</p>
+                            <p id="res-ext" class="text-xl font-bold font-mono text-gray-800 mt-1">-</p>
+                        </div>
+                        <div class="bg-white rounded-xl p-4 shadow-sm border-t-4 border-gray-400">
+                            <p class="text-xs text-gray-500 uppercase font-semibold">Unidades Participantes</p>
+                            <p id="res-units" class="text-xl font-bold font-mono text-gray-800 mt-1">-</p>
+                        </div>
+                    </div>
+                    <!-- Result Table -->
+                    <div class="glass-card rounded-xl shadow-sm overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm" id="resultado-tabla">
+                                <thead class="bg-gray-50 text-gray-500 text-xs uppercase tracking-wider border-b border-gray-200">
+                                    <tr id="resultado-thead">
+                                        <th class="p-3 text-left font-medium sticky left-0 bg-gray-50">Unidad</th>
+                                        <!-- Dynamic headers -->
+                                    </tr>
+                                </thead>
+                                <tbody id="resultado-tbody"></tbody>
+                                <tfoot id="resultado-tfoot" class="bg-gray-50 border-t-2 border-gray-300 font-bold"></tfoot>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 3: CUPONES -->
+            <div id="panel-cupones" class="hidden">
+                <div id="cupones-placeholder" class="glass-card rounded-xl p-12 text-center text-gray-400 anim-in">
+                    <i class="fas fa-receipt text-4xl mb-3 text-gray-300"></i>
+                    <p class="font-medium text-gray-500">Los cupones aparecen luego de calcular la liquidación</p>
+                </div>
+                <div id="cupones-grid" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
+            </div>
+
+        </div>
+    </main>
+</div>
+
+<script>
+const fmt = (n) => new Intl.NumberFormat('es-AR', {style:'currency',currency:'ARS',minimumFractionDigits:2}).format(n);
+const fmtPct = (n) => n.toFixed(4) + '%';
+const conjuntosCoeficientes = ['Reglamento', 'Sin Locales', 'Cocheras'];
+const coeficientesPorConjunto = {
+    'Reglamento': { U1: 30, U2: 22, U3: 20, U4: 18, U5: 10 },
+    'Sin Locales': { U1: 32, U2: 24, U3: 21, U4: 18, U5: 5 },
+    'Cocheras': { U1: 40, U2: 25, U3: 20, U4: 15, U5: 0 }
+};
+
+// ─── DATA ────────────────────────────────────────────
+const unidades = [
+    { id: 'U1', numero: '1A', propietario: 'Juan Pérez',     inquilino: 'María López',    coeficiente: 30.00, color: '#3b82f6' },
+    { id: 'U2', numero: '1B', propietario: 'Carlos Gómez',   inquilino: null,             coeficiente: 22.00, color: '#8b5cf6' },
+    { id: 'U3', numero: '2A', propietario: 'Ana Silva',      inquilino: 'Pedro Castro',   coeficiente: 20.00, color: '#f59e0b' },
+    { id: 'U4', numero: '2B', propietario: 'Lucas Romero',   inquilino: 'Sara Díaz',      coeficiente: 18.00, color: '#ec4899' },
+    { id: 'U5', numero: 'PH', propietario: 'Verónica Soto',  inquilino: null,             coeficiente: 10.00, color: '#10b981' },
+];
+
+const conceptos = [
+    { id: 'C1', nombre: 'Honorarios Administración',  monto: 120000, tipo: 'ordinario',      metodo: 'coeficiente', conjunto: 'Reglamento', excluidos: new Set(), manuales: {} },
+    { id: 'C2', nombre: 'Limpieza y Desinfección',    monto: 97540,  tipo: 'ordinario',      metodo: 'coeficiente', conjunto: 'Reglamento', excluidos: new Set(), manuales: {} },
+    { id: 'C3', nombre: 'EPEC – Luz Áreas Comunes',   monto: 60000,  tipo: 'ordinario',      metodo: 'partes_iguales', conjunto: 'Reglamento', excluidos: new Set(['U5']), manuales: {} },
+    { id: 'C4', nombre: 'Agua Cordobesa',             monto: 45000,  tipo: 'ordinario',      metodo: 'coeficiente', conjunto: 'Reglamento', excluidos: new Set(), manuales: {} },
+    { id: 'C5', nombre: 'Pintura Fachada – Cuota 2/3',monto: 150000, tipo: 'extraordinario', metodo: 'partes_iguales', conjunto: 'Reglamento', excluidos: new Set(), manuales: {} },
+    { id: 'C6', nombre: 'Reposición Bomba de Agua',  monto: 275000, tipo: 'extraordinario', metodo: 'manual', conjunto: 'Reglamento', excluidos: new Set(), manuales: { U1:40, U2:30, U3:20, U4:7, U5:3 } },
+];
+
+// ─── TABS ─────────────────────────────────────────────
+function switchTab(tab) {
+    ['config','resultado','cupones'].forEach(t => {
+        document.getElementById(`panel-${t}`).classList.toggle('hidden', t !== tab);
+        document.getElementById(`tab-${t}`).classList.toggle('active', t === tab);
+    });
+}
+
+// ─── CONFIG RENDER ─────────────────────────────────────
+function renderConfig() {
+    const container = document.getElementById('config-table-container');
+    container.innerHTML = '';
+
+    conceptos.forEach(c => {
+        const div = document.createElement('div');
+        div.className = 'glass-card rounded-xl shadow-sm overflow-hidden bg-white';
+
+        const pctActivos = getPctActivos(c);
+
+        div.innerHTML = `
+            <div class="flex justify-between items-center p-4 border-b border-gray-100 bg-gray-50/60">
+                <div class="flex items-center gap-3 flex-1 min-w-0">
+                    <div>
+                        <h4 class="font-bold text-gray-800 text-sm leading-tight">${c.nombre}</h4>
+                        <div class="flex items-center gap-2 mt-1">
+                            <span class="${c.tipo==='ordinario'?'pill-ord':'pill-ext'}">${c.tipo==='ordinario'?'Ordinario':'Extraordinario'}</span>
+                            <span class="text-xs font-mono text-gray-500">${fmt(c.monto)}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex gap-2 ml-4 flex-wrap justify-end">
+                    <button onclick="setConceptoMethod('${c.id}','coeficiente')" class="method-btn ${c.metodo==='coeficiente'?'active-coef':''}">📐 Coeficiente</button>
+                    <button onclick="setConceptoMethod('${c.id}','partes_iguales')" class="method-btn ${c.metodo==='partes_iguales'?'active-igual':''}">⚖️ Partes Iguales</button>
+                    <button onclick="setConceptoMethod('${c.id}','manual')" class="method-btn ${c.metodo==='manual'?'active-manual':''}">✏️ Manual</button>
+                </div>
+            </div>
+            ${c.metodo==='coeficiente' ? `
+                <div class="px-4 py-2 border-b border-gray-100 bg-blue-50/40 flex items-center gap-2 text-xs">
+                    <span class="font-semibold text-blue-800">Conjunto de coeficientes:</span>
+                    <select onchange="setConceptoConjunto('${c.id}', this.value)" class="border border-blue-200 rounded px-2 py-1 bg-white text-blue-900">
+                        ${conjuntosCoeficientes.map(name => `<option value="${name}" ${c.conjunto===name?'selected':''}>${name}</option>`).join('')}
+                    </select>
+                </div>
+            ` : ''}
+
+            <!-- Unidades config table -->
+            <div class="overflow-x-auto">
+                <table class="w-full text-xs">
+                    <thead>
+                        <tr class="bg-gray-50 text-gray-400 uppercase tracking-wider border-b border-gray-100">
+                            <th class="px-4 py-2 text-left font-medium w-8">Excl.</th>
+                            <th class="px-4 py-2 text-left font-medium">Unidad</th>
+                            <th class="px-4 py-2 text-left font-medium">Prop./Inq.</th>
+                            <th class="px-4 py-2 text-right font-medium w-28">Coef. Original</th>
+                            <th class="px-4 py-2 text-right font-medium w-32">Coef. Aplicado</th>
+                            ${c.metodo==='manual' ? '<th class="px-4 py-2 text-center font-medium w-28">% Manual</th><th class="px-4 py-2 text-center font-medium w-8"></th>' : ''}
+                            <th class="px-4 py-2 text-right font-medium w-36">Monto a Pagar</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-50">
+                        ${unidades.map(u => renderUnidadRow(c, u, pctActivos)).join('')}
+                    </tbody>
+                    <tfoot class="border-t border-gray-200 bg-gray-50">
+                        <tr>
+                            <td colspan="${c.metodo==='manual'?6:4}" class="px-4 py-2 text-right text-gray-500 font-bold">Total participantes / verificación:</td>
+                            <td class="px-4 py-2 text-right font-mono font-bold ${Math.abs(getSumaVerif(c, pctActivos) - c.monto) < 0.5 ? 'text-emerald-600' : 'text-rose-600'} text-sm">
+                                ${fmt(getSumaVerif(c, pctActivos))} 
+                                ${Math.abs(getSumaVerif(c, pctActivos) - c.monto) < 0.5 ? '✓' : '⚠️'}
+                            </td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>`;
+
+        container.appendChild(div);
+    });
+}
+
+function getPctActivos(c) {
+    if (c.metodo !== 'coeficiente') return 100;
+    const activos = unidades.filter(u => !c.excluidos.has(u.id));
+    const sumCoef = activos.reduce((a, u) => a + getCoefBase(c, u.id), 0);
+    return sumCoef;
+}
+
+function getCoefBase(c, uid) {
+    const set = coeficientesPorConjunto[c.conjunto] || coeficientesPorConjunto['Reglamento'];
+    return set[uid] || 0;
+}
+
+function getMontoUnidad(c, u, pctActivos) {
+    if (c.excluidos.has(u.id)) return 0;
+    if (c.metodo === 'coeficiente') {
+        return c.monto * (getCoefBase(c, u.id) / pctActivos);
+    } else if (c.metodo === 'partes_iguales') {
+        const activos = unidades.filter(x => !c.excluidos.has(x.id)).length;
+        return activos > 0 ? c.monto / activos : 0;
+    } else { // manual
+        return c.monto * ((c.manuales[u.id] || 0) / 100);
+    }
+}
+
+function getCoefAplicado(c, u, pctActivos) {
+    if (c.excluidos.has(u.id)) return 0;
+    if (c.metodo === 'coeficiente') return (getCoefBase(c, u.id) / pctActivos) * 100;
+    if (c.metodo === 'partes_iguales') return 100 / unidades.filter(x => !c.excluidos.has(x.id)).length;
+    return c.manuales[u.id] || 0;
+}
+
+function getSumaVerif(c, pctActivos) {
+    return unidades.reduce((s, u) => s + getMontoUnidad(c, u, pctActivos), 0);
+}
+
+function getSumaManuales(c) {
+    return Object.values(c.manuales).reduce((s, v) => s + (parseFloat(v) || 0), 0);
+}
+
+function renderUnidadRow(c, u, pctActivos) {
+    const isExcl = c.excluidos.has(u.id);
+    const monto = getMontoUnidad(c, u, pctActivos);
+    const coefApl = getCoefAplicado(c, u, pctActivos);
+    const coefRepr = c.metodo === 'coeficiente' && !isExcl && pctActivos < 99.999
+        ? `<span class="inline-block ml-1 text-blue-600 font-bold">(→${fmtPct(coefApl)})</span>` : '';
+
+    let manualCol = '';
+    if (c.metodo === 'manual') {
+        const sumSinEsta = getSumaManuales(c) - (parseFloat(c.manuales[u.id]) || 0);
+        const restante = 100 - sumSinEsta;
+        manualCol = `
+            <td class="px-4 py-2.5 text-center">
+                ${isExcl ? '<span class="text-gray-300">—</span>' : `
+                    <input type="number" min="0" max="100" step="0.5"
+                        class="manual-input"
+                        value="${c.manuales[u.id] !== undefined ? c.manuales[u.id] : ''}"
+                        placeholder="0"
+                        oninput="setManual('${c.id}','${u.id}',this.value)"
+                    > %`}
+            </td>
+            <td class="px-4 py-2.5 text-center text-gray-400 text-[10px]">
+                ${isExcl ? '' : `Max: ${restante.toFixed(1)}%`}
+            </td>`;
+    }
+
+    const sumaManual = c.metodo === 'manual' ? getSumaManuales(c) : 100;
+    const pctOk = c.metodo !== 'manual' || Math.abs(sumaManual - 100) < 0.1;
+
+    return `
+        <tr class="excl-row hover:bg-gray-50/50 transition-colors ${isExcl ? 'excluded' : ''}">
+            <td class="px-4 py-2.5">
+                <input type="checkbox" class="excl-check" ${isExcl?'checked':''}
+                    onchange="toggleExcluir('${c.id}','${u.id}',this.checked)"
+                    title="Excluir esta unidad de este concepto">
+            </td>
+            <td class="px-4 py-2.5 font-bold text-gray-800">
+                <div style="display:flex;align-items:center;gap:6px">
+                    <span style="width:8px;height:8px;border-radius:50%;background:${u.color};display:inline-block"></span>
+                    ${u.numero}
+                </div>
+            </td>
+            <td class="px-4 py-2.5 text-gray-600">
+                ${u.propietario}<br>
+                ${u.inquilino ? `<span class="text-gray-400">${u.inquilino}</span>` : '<span class="text-gray-300 italic">Sin inquilino</span>'}
+            </td>
+            <td class="px-4 py-2.5 text-right font-mono text-gray-500">${fmtPct(getCoefBase(c, u.id))}</td>
+            <td class="px-4 py-2.5 text-right font-mono text-gray-700">
+                ${isExcl ? '<span class="text-rose-400 text-xs font-bold">EXCLUIDA</span>' : `${fmtPct(coefApl)}${coefRepr}`}
+            </td>
+            ${manualCol}
+            <td class="px-4 py-2.5 text-right font-mono font-bold text-gray-800 text-sm">
+                ${isExcl ? '<span class="text-gray-300">$ 0,00</span>' : fmt(monto)}
+            </td>
+        </tr>`;
+}
+
+// ─── INTERACTIONS ──────────────────────────────────────
+function setGlobalMethod(m) {
+    conceptos.forEach(c => { c.metodo = m; if (m !== 'manual') c.manuales = {}; });
+    renderConfig();
+}
+
+function setConceptoMethod(cid, m) {
+    const c = conceptos.find(x => x.id === cid);
+    if (!c) return;
+    c.metodo = m;
+    if (m !== 'manual') c.manuales = {};
+    else {
+        // Init manuales equitativamente
+        const activos = unidades.filter(u => !c.excluidos.has(u.id));
+        const pct = parseFloat((100 / activos.length).toFixed(2));
+        activos.forEach((u, i) => {
+            c.manuales[u.id] = i < activos.length - 1 ? pct : parseFloat((100 - pct * (activos.length - 1)).toFixed(2));
+        });
+    }
+    renderConfig();
+}
+
+function setConceptoConjunto(cid, conjunto) {
+    const c = conceptos.find(x => x.id === cid);
+    if (!c) return;
+    c.conjunto = conjunto;
+    renderConfig();
+}
+
+function toggleExcluir(cid, uid, excluido) {
+    const c = conceptos.find(x => x.id === cid);
+    if (!c) return;
+    if (excluido) c.excluidos.add(uid);
+    else c.excluidos.delete(uid);
+    if (c.metodo === 'manual') {
+        if (excluido) delete c.manuales[uid];
+        // redistribuir
+    }
+    renderConfig();
+}
+
+function setManual(cid, uid, val) {
+    const c = conceptos.find(x => x.id === cid);
+    if (!c) return;
+    c.manuales[uid] = parseFloat(val) || 0;
+    // Visual feedback sin re-render completo
+    const sum = getSumaManuales(c);
+    const inputs = document.querySelectorAll(`input.manual-input`);
+    // Update monto display inline
+    renderConfig();
+}
+
+// ─── CALCULATION & RESULTS ─────────────────────────────
+function calcularLiquidacion() {
+    // Validate manual methods
+    for (const c of conceptos) {
+        if (c.metodo === 'manual') {
+            const sum = getSumaManuales(c);
+            if (Math.abs(sum - 100) > 0.1) {
+                alert(`⚠️ El concepto "${c.nombre}" usa distribución Manual, pero los porcentajes suman ${sum.toFixed(2)}% (debe ser exactamente 100%). Corregilo antes de calcular.`);
+                switchTab('config');
+                return;
+            }
+        }
+    }
+
+    // Calculate for each unit
+    const unitResults = {};
+    unidades.forEach(u => { unitResults[u.id] = { ordinario: 0, extraordinario: 0, total: 0, detalles: [] }; });
+
+    conceptos.forEach(c => {
+        const pctActivos = getPctActivos(c);
+        unidades.forEach(u => {
+            const monto = getMontoUnidad(c, u, pctActivos);
+            const coefApl = getCoefAplicado(c, u, pctActivos);
+            if (c.tipo === 'ordinario') unitResults[u.id].ordinario += monto;
+            else unitResults[u.id].extraordinario += monto;
+            unitResults[u.id].total += monto;
+            unitResults[u.id].detalles.push({ concepto: c, monto, coefApl, excluido: c.excluidos.has(u.id) });
+        });
+    });
+
+    const totalGen = unidades.reduce((s, u) => s + unitResults[u.id].total, 0);
+    const totalOrd = unidades.reduce((s, u) => s + unitResults[u.id].ordinario, 0);
+    const totalExt = unidades.reduce((s, u) => s + unitResults[u.id].extraordinario, 0);
+
+    // Render Results Table
+    renderResultTable(unitResults, totalOrd, totalExt, totalGen);
+    renderCupones(unitResults);
+
+    // Switch to result tab
+    switchTab('resultado');
+}
+
+function renderResultTable(unitResults, totalOrd, totalExt, totalGen) {
+    document.getElementById('resultado-placeholder').classList.add('hidden');
+    document.getElementById('resultado-content').classList.remove('hidden');
+
+    document.getElementById('res-total').textContent = fmt(totalGen);
+    document.getElementById('res-ord').textContent = fmt(totalOrd);
+    document.getElementById('res-ext').textContent = fmt(totalExt);
+    document.getElementById('res-units').textContent = unidades.length;
+
+    // Header
+    const thead = document.getElementById('resultado-thead');
+    thead.innerHTML = `<th class="p-3 text-left font-medium sticky left-0 bg-gray-50 z-10">Unidad</th>`;
+    conceptos.forEach(c => {
+        thead.innerHTML += `<th class="p-3 text-right font-medium whitespace-nowrap ${c.tipo==='ordinario'?'text-emerald-700':'text-amber-700'}">${c.nombre.substring(0,20)}${c.nombre.length>20?'…':''}</th>`;
+    });
+    thead.innerHTML += `<th class="p-3 text-right font-medium text-gray-700 bg-gray-100">TOTAL</th>`;
+
+    // Body
+    const tbody = document.getElementById('resultado-tbody');
+    tbody.innerHTML = '';
+    unidades.forEach(u => {
+        const r = unitResults[u.id];
+        let cols = conceptos.map(c => {
+            const det = r.detalles.find(d => d.concepto.id === c.id);
+            if (!det || det.monto === 0) return `<td class="p-3 text-right text-gray-300 font-mono text-xs">—</td>`;
+            return `<td class="p-3 text-right font-mono text-gray-700 text-sm">${fmt(det.monto)}</td>`;
+        }).join('');
+
+        tbody.innerHTML += `
+            <tr class="result-row hover:bg-gray-50 border-b border-gray-100">
+                <td class="p-3 sticky left-0 bg-white z-10">
+                    <div class="flex items-center gap-2">
+                        <span style="width:10px;height:10px;border-radius:50%;background:${u.color};display:inline-block;flex-shrink:0"></span>
+                        <div>
+                            <div class="font-bold text-gray-800">Unidad ${u.numero}</div>
+                            <div class="text-xs text-gray-400">${u.propietario}</div>
+                        </div>
+                    </div>
+                </td>
+                ${cols}
+                <td class="p-3 text-right font-mono font-bold text-gray-900 text-base bg-gray-50">${fmt(r.total)}</td>
+            </tr>`;
+    });
+
+    // Footer totals
+    const tfoot = document.getElementById('resultado-tfoot');
+    let footCols = conceptos.map(c => {
+        const sum = unidades.reduce((s, u) => {
+            const det = unitResults[u.id].detalles.find(d => d.concepto.id === c.id);
+            return s + (det ? det.monto : 0);
+        }, 0);
+        return `<td class="p-3 text-right font-mono font-bold text-gray-700 text-sm">${fmt(sum)}</td>`;
+    }).join('');
+    tfoot.innerHTML = `
+        <tr>
+            <td class="p-3 font-bold text-gray-700 sticky left-0 bg-gray-50 z-10">TOTALES</td>
+            ${footCols}
+            <td class="p-3 text-right font-mono font-bold text-gray-900 text-base bg-gray-100">${fmt(totalGen)}</td>
+        </tr>`;
+}
+
+function makeCupon(u, tipo, monto, detalles, color) {
+    if (monto <= 0) return ''; // No generar cupón si no hay monto
+
+    const esOrdinario = tipo === 'ordinario';
+    const pagador = esOrdinario
+        ? (u.inquilino ?? u.propietario)   // Ordinario: inquilino si existe, sino propietario
+        : u.propietario;                    // Extraordinario: siempre propietario
+
+    const accentColor = esOrdinario ? '#059669' : '#d97706';
+    const recargoSegundoVto = 1.8;
+    const montoSegundoVto = monto * (1 + recargoSegundoVto / 100);
+    const nroCupon = u.id.replace('U', '').padStart(3, '0');
+    const codigoPagoElectronico = `0190014125150101127${nroCupon}`;
+
+    return `
+        <div class="cupon-card anim-in" style="--cp-color:${accentColor}">
+            <div class="mt-2">
+                <div class="flex items-start justify-between">
+                    <div>
+                        <p class="text-[10px] uppercase tracking-wide text-gray-500">Administración</p>
+                        <p class="text-sm font-bold text-gray-900">Administracion OLIVA</p>
+                    </div>
+                    <span style="background:#1E3A5F" class="text-white text-[10px] font-bold px-2 py-1 rounded">SIRO - ${nroCupon}</span>
+                </div>
+                <div class="mt-3 border-t border-b border-gray-200 py-2 text-xs text-gray-700">
+                    <p class="font-bold text-gray-900">CONSORCIO PENCA II</p>
+                    <p>Ciraico Ortíz nro. 1446</p>
+                    <p>CUIT 20142177677 · IVA No Alcanzado</p>
+                    <p>CBU 2470005610000001011277</p>
+                    <p>Bco.Roela Cta.Cte Recaudadora 10112/7</p>
+                </div>
+                <div class="mt-2 grid grid-cols-2 gap-2 text-xs">
+                    <div><span class="text-gray-500">Cupón de Pago:</span> <span class="font-bold">${nroCupon}</span></div>
+                    <div><span class="text-gray-500">Departamento:</span> <span class="font-bold">${u.numero}</span></div>
+                    <div class="col-span-2"><span class="text-gray-500">Periodo a abonar:</span> <span class="font-bold">Abril 2026</span></div>
+                    <div class="col-span-2"><span class="text-gray-500">Consorcista:</span> <span class="font-bold">${pagador}</span></div>
+                </div>
+            </div>
+
+            <div class="mt-3 bg-gray-50 rounded-lg p-3">
+                <p class="text-[10px] uppercase tracking-wide text-gray-500 mb-1">Vencimientos</p>
+                <div class="flex justify-between text-sm font-mono">
+                    <span>10/04/2026</span>
+                    <span class="font-bold">${fmt(monto)}</span>
+                </div>
+                <div class="flex justify-between text-sm font-mono mt-1">
+                    <span>28/04/2026</span>
+                    <span class="font-bold">${fmt(montoSegundoVto)}</span>
+                </div>
+            </div>
+
+            <div class="mt-3 text-xs">
+                <p class="text-gray-500">Código de Pago Electronico</p>
+                <p class="font-mono font-bold text-gray-800">${codigoPagoElectronico}</p>
+            </div>
+            <div class="mt-2 bg-gray-100 h-8 rounded flex items-center justify-center text-[10px] text-gray-400 font-mono tracking-[6px] border border-gray-200 overflow-hidden">
+                04480000001019001242602100007511250180007646453515010112753
+            </div>
+            <p class="text-center text-[9px] text-gray-300 mt-1">Código de barras SIRO (simulado)</p>
+            <p class="text-[10px] text-gray-500 mt-2">
+                Se puede abonar en Rapipago, PagoFacil, Cobro Express, Pago Mis Cuentas, Banelco, Red Link, MODO y Mercado Pago.
+            </p>
+        </div>`;
+}
+
+function renderCupones(unitResults) {
+    document.getElementById('cupones-placeholder').classList.add('hidden');
+    const grid = document.getElementById('cupones-grid');
+    grid.classList.remove('hidden');
+    grid.innerHTML = '';
+
+    // Encabezado Ordinarios
+    grid.innerHTML += `
+        <div class="col-span-full flex items-center gap-3 mb-2">
+            <div class="h-1 flex-1 rounded bg-emerald-400"></div>
+            <span class="text-sm font-bold text-emerald-700 uppercase tracking-wider whitespace-nowrap"><i class="fas fa-user mr-1.5"></i>Expensas Ordinarias — Pagan Inquilinos / Propietarios s/inq.</span>
+            <div class="h-1 flex-1 rounded bg-emerald-400"></div>
+        </div>`;
+
+    // Cupones Ordinarios
+    unidades.forEach(u => {
+        const r = unitResults[u.id];
+        if (r.ordinario > 0) {
+            grid.innerHTML += makeCupon(u, 'ordinario', r.ordinario, r.detalles, u.color);
+        }
+    });
+
+    // Encabezado Extraordinarios
+    grid.innerHTML += `
+        <div class="col-span-full flex items-center gap-3 mt-6 mb-2">
+            <div class="h-1 flex-1 rounded bg-amber-400"></div>
+            <span class="text-sm font-bold text-amber-700 uppercase tracking-wider whitespace-nowrap"><i class="fas fa-hard-hat mr-1.5"></i>Expensas Extraordinarias — Pagan Propietarios</span>
+            <div class="h-1 flex-1 rounded bg-amber-400"></div>
+        </div>`;
+
+    // Cupones Extraordinarios
+    unidades.forEach(u => {
+        const r = unitResults[u.id];
+        if (r.extraordinario > 0) {
+            grid.innerHTML += makeCupon(u, 'extraordinario', r.extraordinario, r.detalles, u.color);
+        }
+    });
+}
+
+// ─── INIT ──────────────────────────────────────────────
+renderConfig();
+</script>
+</body>
+</html>

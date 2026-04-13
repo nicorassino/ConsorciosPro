@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ConsorciosPro - Presupuestos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: { 900: '#1E3A5F' },
+                        accent: { 500: '#059669', 600: '#047857' }
+                    },
+                    fontFamily: { sans: ['Inter', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #F3F4F6; }
+        .glass-card { background: rgba(255,255,255,0.97); border: 1px solid rgba(0,0,0,0.06); }
+        .concept-row { transition: background 0.15s; }
+        .concept-row:hover { background: #f9fafb; }
+        .editable-cell input, .editable-cell select {
+            border: 1px solid transparent;
+            background: transparent;
+            outline: none;
+            width: 100%;
+            padding: 2px 4px;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+        .editable-cell input:hover, .editable-cell select:hover { background: #f3f4f6; border-color: #d1d5db; }
+        .editable-cell input:focus, .editable-cell select:focus { background: #fff; border-color: #059669; box-shadow: 0 0 0 2px rgba(5,150,105,0.15); }
+        .editable-cell.money input { font-family: 'Courier New', monospace; font-weight: 600; }
+        .pill-ord { background:#d1fae5; color:#065f46; font-size:10px; font-weight:700; padding:2px 8px; border-radius:999px; text-transform:uppercase; }
+        .pill-ext { background:#fef3c7; color:#92400e; font-size:10px; font-weight:700; padding:2px 8px; border-radius:999px; text-transform:uppercase; }
+        .pill-adj { background:#fee2e2; color:#991b1b; font-size:10px; font-weight:700; padding:2px 8px; border-radius:999px; text-transform:uppercase; }
+        .factura-badge { background:#dbeafe; color:#1e40af; font-size:11px; font-weight:600; padding:3px 8px; border-radius:6px; display:inline-flex; align-items:center; gap:4px; border:1px solid #bfdbfe; }
+        .estimado-badge { background:#fef3c7; color:#92400e; font-size:11px; font-weight:600; padding:3px 8px; border-radius:6px; display:inline-flex; align-items:center; gap:4px; border:1px solid #fde68a; }
+        .btn-icon { width:30px; height:30px; display:inline-flex; align-items:center; justify-content:center; border-radius:6px; cursor:pointer; transition:all 0.15s; }
+        .btn-icon:hover { transform:scale(1.1); }
+        #modal-backdrop { transition: opacity 0.2s; }
+        .anim-in { animation: fadeSlideIn 0.25s ease; }
+        @keyframes fadeSlideIn { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:none; } }
+    </style>
+</head>
+<body class="text-gray-800 antialiased flex h-screen overflow-hidden">
+
+<!-- Sidebar -->
+<aside class="w-60 bg-primary-900 text-white flex flex-col shadow-2xl flex-shrink-0 z-20 hidden md:flex">
+    <div class="p-5 flex items-center justify-center border-b border-white/10">
+        <div class="flex flex-col items-center">
+            <div class="h-10 w-10 bg-white rounded-lg flex items-center justify-center mb-2 shadow text-primary-900 font-bold text-xl">CP</div>
+            <h1 class="text-lg font-bold text-white">Consorcios<span class="text-accent-500">Pro</span></h1>
+        </div>
+    </div>
+    <div class="p-4 flex-1">
+        <nav class="space-y-1">
+            <a href="index.html" class="flex items-center gap-3 px-3 py-2 text-gray-300 hover:bg-white/10 hover:text-white rounded-lg transition-colors text-sm"><i class="fas fa-home w-4"></i> Dashboard</a>
+            <a href="consorcios.html" class="flex items-center gap-3 px-3 py-2 text-gray-300 hover:bg-white/10 hover:text-white rounded-lg transition-colors text-sm"><i class="fas fa-building w-4"></i> Consorcios</a>
+            <a href="departamentos.html" class="flex items-center gap-3 px-3 py-2 text-gray-300 hover:bg-white/10 hover:text-white rounded-lg transition-colors text-sm"><i class="fas fa-door-open w-4"></i> Unidades</a>
+            <div class="pt-4 pb-1"><p class="text-[10px] font-bold text-gray-500 uppercase tracking-wider px-3">Finanzas</p></div>
+            <a href="presupuestos.html" class="flex items-center gap-3 px-3 py-2 bg-accent-600/25 text-accent-500 border-r-4 border-accent-500 rounded-lg text-sm font-semibold"><i class="fas fa-calculator w-4"></i> Presupuestos</a>
+            <a href="liquidaciones.html" class="flex items-center gap-3 px-3 py-2 text-gray-300 hover:bg-white/10 hover:text-white rounded-lg transition-colors text-sm"><i class="fas fa-file-invoice-dollar w-4"></i> Liquidaciones</a>
+        </nav>
+    </div>
+    
+    <div class="p-4 border-t border-primary-800/50 bg-primary-800/20 flex justify-center">
+        <img src="../img/logo_cliente.png" alt="Oliva Administraciones" class="h-20 w-auto max-w-[95%] object-contain bg-white rounded-xl p-3 shadow-sm hover:scale-105 transition-transform">
+    </div>
+</aside>
+
+<!-- Main -->
+<div class="flex-1 flex flex-col h-screen overflow-hidden">
+    <header class="bg-white shadow-sm z-10 border-b border-gray-100">
+        <div class="flex items-center justify-between px-6 py-3">
+            <h2 class="text-xl font-bold text-gray-800">Presupuesto Mensual <span class="text-accent-600 ml-2">— Edificio San Martín · Abril 2026</span></h2>
+            <div class="flex items-center gap-3">
+                <span class="text-xs font-bold bg-yellow-100 text-yellow-800 border border-yellow-200 px-3 py-1 rounded-full"><i class="fas fa-edit mr-1"></i>Borrador</span>
+                <button onclick="finalizarPresupuesto()" class="bg-primary-900 hover:bg-primary-800 text-white px-4 py-1.5 rounded-lg text-sm font-bold transition-colors flex items-center gap-2">
+                    <i class="fas fa-check-double"></i> Finalizar
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-1 overflow-y-auto p-5 bg-gray-50">
+        <div class="max-w-7xl mx-auto space-y-5">
+
+            <!-- Info Banner -->
+            <div class="bg-blue-50 border-l-4 border-blue-500 p-3 rounded-r-lg flex items-start gap-2 text-sm">
+                <i class="fas fa-info-circle text-blue-500 mt-0.5"></i>
+                <span class="text-blue-800"><strong>Todos los conceptos son estimados</strong> hasta que se vincula una factura real. Editá los montos directamente en la tabla. Hacé clic en <i class="fas fa-link"></i> para vincular una factura.</span>
+            </div>
+
+            <!-- Summary Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="bg-white rounded-xl p-4 border-t-4 border-emerald-500 shadow-sm">
+                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Total Ordinario</p>
+                    <h3 id="total-ord" class="text-2xl font-bold text-gray-800 mt-1 font-mono">$ 0,00</h3>
+                    <p class="text-xs text-emerald-600 mt-1">Pagan inquilinos</p>
+                </div>
+                <div class="bg-white rounded-xl p-4 border-t-4 border-amber-500 shadow-sm">
+                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Total Extraordinario</p>
+                    <h3 id="total-ext" class="text-2xl font-bold text-gray-800 mt-1 font-mono">$ 0,00</h3>
+                    <p class="text-xs text-amber-600 mt-1">Pagan propietarios</p>
+                </div>
+                <div class="bg-primary-900 rounded-xl p-4 shadow-md text-white">
+                    <p class="text-xs font-semibold text-white/60 uppercase tracking-wide">Total General</p>
+                    <h3 id="total-gen" class="text-2xl font-bold text-white mt-1 font-mono">$ 0,00</h3>
+                </div>
+            </div>
+
+            <!-- Concepts Table -->
+            <div class="glass-card rounded-xl shadow-sm overflow-hidden">
+                <div class="flex justify-between items-center p-4 border-b border-gray-100 bg-gray-50">
+                    <div class="flex items-center gap-3">
+                        <h3 class="font-bold text-gray-700">Conceptos del Mes</h3>
+                        <div class="flex items-center gap-1 text-xs">
+                            <button onclick="setFiltroTipo('todos')" id="filtro-todos" class="px-2 py-1 rounded bg-gray-800 text-white">Todos</button>
+                            <button onclick="setFiltroTipo('ordinario')" id="filtro-ord" class="px-2 py-1 rounded bg-white border border-gray-300 text-gray-600">Ordinarios</button>
+                            <button onclick="setFiltroTipo('extraordinario')" id="filtro-ext" class="px-2 py-1 rounded bg-white border border-gray-300 text-gray-600">Extraordinarios</button>
+                        </div>
+                    </div>
+                    <button onclick="abrirModalConcepto()" class="bg-gray-800 hover:bg-gray-900 text-white px-3 py-1.5 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors">
+                        <i class="fas fa-plus"></i> Agregar Concepto
+                    </button>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm" id="tabla-conceptos">
+                        <thead class="bg-gray-50 text-gray-500 text-xs uppercase tracking-wider border-b border-gray-200">
+                            <tr>
+                                <th class="p-3 font-medium text-left w-8">#</th>
+                                <th class="p-3 font-medium text-left">Concepto</th>
+                                <th class="p-3 font-medium text-left w-32">Tipo</th>
+                                <th class="p-3 font-medium text-left w-36">Rubro</th>
+                                <th class="p-3 font-medium text-right w-44">Monto Estimado</th>
+                                <th class="p-3 font-medium text-center w-28">Cuotas</th>
+                                <th class="p-3 font-medium text-left w-52">Estado Factura</th>
+                                <th class="p-3 font-medium text-center w-32">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="conceptos-body" class="divide-y divide-gray-100 bg-white">
+                            <!-- Rendered by JS -->
+                        </tbody>
+                        <tfoot id="tabla-foot" class="bg-gray-50 border-t-2 border-gray-200 font-bold text-sm hidden">
+                            <tr>
+                                <td colspan="3" class="p-3 text-right text-gray-600">TOTAL PRESUPUESTADO:</td>
+                                <td id="foot-total" class="p-3 text-right font-mono text-gray-900 text-base"></td>
+                                <td colspan="3"></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- Modal Nuevo Concepto -->
+<div id="modal-backdrop" class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-xl m-4 anim-in">
+        <div class="p-5 border-b border-gray-100 flex justify-between items-center">
+            <h3 class="text-lg font-bold text-gray-800" id="modal-title">Agregar Concepto</h3>
+            <button onclick="cerrarModal()" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times text-lg"></i></button>
+        </div>
+        <div class="p-6 space-y-4">
+            <input type="hidden" id="modal-id">
+            <div>
+                <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Nombre del Concepto *</label>
+                <input id="modal-nombre" type="text" class="w-full p-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-accent-500 focus:border-accent-500" placeholder="Ej: Honorarios Administración">
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Monto Estimado *</label>
+                    <div class="relative">
+                        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-medium">$</span>
+                        <input id="modal-monto" type="number" min="0" step="0.01" class="w-full pl-8 pr-2 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-accent-500" placeholder="0.00">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Tipo *</label>
+                    <select id="modal-tipo" class="w-full p-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-accent-500">
+                        <option value="ordinario">Ordinario (Inquilino)</option>
+                        <option value="extraordinario">Extraordinario (Propietario)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Rubro *</label>
+                    <select id="modal-rubro" class="w-full p-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-accent-500">
+                        <option value="servicios">Servicios</option>
+                        <option value="mantenimiento">Mantenimiento</option>
+                        <option value="sueldos">Sueldos</option>
+                        <option value="impuestos">Impuestos</option>
+                        <option value="seguros">Seguros</option>
+                        <option value="otros">Otros</option>
+                    </select>
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Nro Total de Cuotas</label>
+                    <input id="modal-cuotas-total" type="number" min="1" value="1" class="w-full p-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-accent-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Cuota Actual</label>
+                    <input id="modal-cuota-actual" type="number" min="1" value="1" class="w-full p-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-accent-500">
+                </div>
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Observaciones</label>
+                <textarea id="modal-obs" class="w-full p-2 border border-gray-300 rounded-lg outline-none text-sm" rows="2"></textarea>
+            </div>
+        </div>
+        <div class="p-5 border-t border-gray-100 bg-gray-50 flex justify-end gap-3 rounded-b-2xl">
+            <button onclick="cerrarModal()" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-100 text-sm">Cancelar</button>
+            <button onclick="guardarConcepto()" class="px-4 py-2 bg-gray-800 rounded-lg text-white font-medium hover:bg-gray-900 text-sm">Guardar Concepto</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Vincular Factura -->
+<div id="modal-factura-backdrop" class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-md m-4 anim-in">
+        <div class="p-5 border-b border-gray-100 flex justify-between items-center">
+            <h3 class="text-lg font-bold text-gray-800">Vincular Factura Real</h3>
+            <button onclick="cerrarModalFactura()" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="p-6 space-y-4">
+            <input type="hidden" id="factura-id">
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 text-sm text-blue-800">
+                <strong>Concepto:</strong> <span id="factura-concepto-nombre" class="font-semibold"></span><br>
+                <strong>Monto Estimado:</strong> <span id="factura-concepto-estimado" class="font-mono font-bold"></span>
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Nro de Factura / Comprobante *</label>
+                <input id="factura-nro" type="text" class="w-full p-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-accent-500" placeholder="Ej: FC-0001-123456">
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Monto Real de la Factura *</label>
+                <div class="relative">
+                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-medium">$</span>
+                    <input id="factura-monto" type="number" min="0" step="0.01" class="w-full pl-8 pr-2 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-accent-500" placeholder="0.00">
+                </div>
+            </div>
+            <div id="factura-diferencia-box" class="hidden bg-amber-50 border border-amber-200 rounded-lg p-3 text-sm text-amber-800">
+                <i class="fas fa-exclamation-triangle mr-1"></i>
+                <strong>Diferencia detectada:</strong> <span id="factura-diferencia-texto"></span><br>
+                <span class="text-xs mt-1 block">Al generar el próximo presupuesto, se creará automáticamente un concepto "<em>Ajuste...</em>" con esta diferencia.</span>
+            </div>
+        </div>
+        <div class="p-5 border-t border-gray-100 bg-gray-50 flex justify-end gap-3 rounded-b-2xl">
+            <button onclick="cerrarModalFactura()" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-100 text-sm">Cancelar</button>
+            <button onclick="vincularFactura()" class="px-4 py-2 bg-blue-600 rounded-lg text-white font-medium hover:bg-blue-700 text-sm">Confirmar Factura</button>
+        </div>
+    </div>
+</div>
+
+<script>
+const fmt = (n) => new Intl.NumberFormat('es-AR', {style:'currency',currency:'ARS',minimumFractionDigits:2}).format(n);
+let nextId = 1;
+let filtroTipo = 'todos';
+
+let conceptos = [
+    { id: nextId++, nombre: 'Honorarios Administración', rubro:'sueldos', obs: '', monto: 120000, tipo: 'ordinario', cuotasTotal: 1, cuotaActual: 1, facturaNro: null, facturaReal: null },
+    { id: nextId++, nombre: 'Limpieza y Desinfección', rubro:'mantenimiento', obs: 'Incluye artículos', monto: 85000, tipo: 'ordinario', cuotasTotal: 1, cuotaActual: 1, facturaNro: 'FC-0001-123456', facturaReal: 97540 },
+    { id: nextId++, nombre: 'EPEC - Luz Áreas Comunes', rubro:'servicios', obs: '', monto: 60000, tipo: 'ordinario', cuotasTotal: 1, cuotaActual: 1, facturaNro: null, facturaReal: null },
+    { id: nextId++, nombre: 'Agua Cordobesa', rubro:'servicios', obs: '', monto: 45000, tipo: 'ordinario', cuotasTotal: 1, cuotaActual: 1, facturaNro: null, facturaReal: null },
+    { id: nextId++, nombre: 'Ajuste: Honorarios Marzo', rubro:'otros', obs: 'Generado automáticamente', monto: 5000, tipo: 'ordinario', cuotasTotal: 1, cuotaActual: 1, facturaNro: 'AUTO', facturaReal: 5000, esAjuste: true },
+    { id: nextId++, nombre: 'Pintura Fachada Exterior', rubro:'mantenimiento', obs: 'Aprobado asamblea', monto: 150000, tipo: 'extraordinario', cuotasTotal: 3, cuotaActual: 2, facturaNro: null, facturaReal: null },
+    { id: nextId++, nombre: 'Reposición Bomba Agua', rubro:'mantenimiento', obs: '', monto: 280000, tipo: 'extraordinario', cuotasTotal: 1, cuotaActual: 1, facturaNro: 'FC-0002-98765', facturaReal: 275000 },
+];
+
+function render() {
+    const tbody = document.getElementById('conceptos-body');
+    tbody.innerHTML = '';
+    let sumOrd = 0, sumExt = 0;
+
+    const conceptosFiltrados = conceptos.filter(c => filtroTipo === 'todos' || c.tipo === filtroTipo);
+    conceptosFiltrados.forEach((c, idx) => {
+        const montoEfectivo = c.facturaReal !== null ? c.facturaReal : c.monto;
+        if (c.tipo === 'ordinario') sumOrd += montoEfectivo;
+        else sumExt += montoEfectivo;
+
+        const tipoPill = c.tipo === 'ordinario'
+            ? `<span class="pill-ord">Ordinario</span>`
+            : `<span class="pill-ext">Extraordinario</span>`;
+
+        const cuotasDisplay = c.cuotasTotal === 1
+            ? '<span class="text-gray-400 text-xs">Única</span>'
+            : `<span class="bg-purple-100 text-purple-700 text-xs font-bold px-2 py-0.5 rounded-full">C. ${c.cuotaActual}/${c.cuotasTotal}</span>`;
+
+        let facturaDisplay;
+        if (c.esAjuste) {
+            facturaDisplay = `<span class="text-xs text-gray-400 italic"><i class="fas fa-robot mr-1"></i>Automático</span>`;
+        } else if (c.facturaReal !== null && c.facturaNro) {
+            const dif = c.facturaReal - c.monto;
+            const difText = dif !== 0
+                ? `<span class="text-[10px] ml-1 font-bold ${dif > 0 ? 'text-rose-600' : 'text-emerald-600'}">(${dif > 0 ? '+' : ''}${fmt(dif)})</span>`
+                : '';
+            facturaDisplay = `
+                <div class="factura-badge"><i class="fas fa-receipt"></i>${c.facturaNro}</div>
+                <div class="text-xs font-mono font-bold text-blue-700 mt-0.5">${fmt(c.facturaReal)}${difText}</div>
+                <button onclick="desvincularFactura(${c.id})" class="text-[10px] text-gray-400 hover:text-rose-500 mt-0.5 block"><i class="fas fa-unlink"></i> desvincular</button>`;
+        } else {
+            facturaDisplay = `
+                <div class="estimado-badge"><i class="fas fa-clock"></i>Pendiente</div>
+                <button onclick="abrirModalFactura(${c.id})" class="mt-1 text-xs text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1"><i class="fas fa-link text-[10px]"></i>Vincular factura</button>`;
+        }
+
+        const montoDisplay = c.facturaReal !== null
+            ? `<span class="line-through text-gray-400 text-xs font-mono">${fmt(c.monto)}</span>
+               <span class="font-mono font-bold text-blue-700 block">${fmt(c.facturaReal)}</span>`
+            : `<input type="number" min="0" step="100" value="${c.monto}"
+                onchange="actualizarMonto(${c.id}, this.value)"
+                class="text-right border border-transparent hover:border-gray-300 focus:border-accent-500 focus:ring-1 focus:ring-accent-500 rounded px-2 py-1 font-mono font-semibold bg-transparent w-36 outline-none text-gray-800"
+                style="text-align:right">`;
+
+        const ajusteClass = c.esAjuste ? 'bg-rose-50/40 border-l-4 border-l-rose-400' : '';
+
+        const tr = document.createElement('tr');
+        tr.className = `concept-row ${ajusteClass}`;
+        tr.innerHTML = `
+            <td class="p-3 text-gray-400 font-mono text-xs">${idx + 1}</td>
+            <td class="p-3">
+                <div class="font-semibold text-gray-800 flex items-center gap-2">
+                    ${c.nombre}
+                    ${c.esAjuste ? '<i class="fas fa-robot text-gray-300 text-xs" title="Generado Automáticamente"></i>' : ''}
+                </div>
+                ${c.obs ? `<div class="text-xs text-gray-600 mt-1 bg-gray-100 rounded px-2 py-1">${c.obs}</div>` : ''}
+            </td>
+            <td class="p-3">${tipoPill}</td>
+            <td class="p-3"><span class="text-xs font-semibold bg-gray-100 text-gray-700 px-2 py-1 rounded-full">${c.rubro || 'otros'}</span></td>
+            <td class="p-3 text-right">${montoDisplay}</td>
+            <td class="p-3 text-center">${cuotasDisplay}</td>
+            <td class="p-3">${facturaDisplay}</td>
+            <td class="p-3 text-center">
+                <div class="flex items-center justify-center gap-1">
+                    ${!c.esAjuste ? `<button onclick="editarConcepto(${c.id})" class="btn-icon bg-blue-50 text-blue-500 hover:bg-blue-100" title="Editar"><i class="fas fa-edit text-xs"></i></button>` : ''}
+                    <button onclick="duplicarConcepto(${c.id})" class="btn-icon bg-gray-100 text-gray-500 hover:bg-gray-200" title="Duplicar"><i class="fas fa-copy text-xs"></i></button>
+                    <button onclick="eliminarConcepto(${c.id})" class="btn-icon bg-rose-50 text-rose-500 hover:bg-rose-100" title="Eliminar"><i class="fas fa-trash text-xs"></i></button>
+                </div>
+            </td>`;
+        tbody.appendChild(tr);
+    });
+
+    document.getElementById('total-ord').textContent = fmt(sumOrd);
+    document.getElementById('total-ext').textContent = fmt(sumExt);
+    document.getElementById('total-gen').textContent = fmt(sumOrd + sumExt);
+
+    if (conceptosFiltrados.length > 0) {
+        document.getElementById('tabla-foot').classList.remove('hidden');
+        document.getElementById('foot-total').textContent = fmt(sumOrd + sumExt);
+    } else {
+        document.getElementById('tabla-foot').classList.add('hidden');
+    }
+}
+
+function setFiltroTipo(tipo) {
+    filtroTipo = tipo;
+    document.getElementById('filtro-todos').className = `px-2 py-1 rounded ${tipo==='todos'?'bg-gray-800 text-white':'bg-white border border-gray-300 text-gray-600'}`;
+    document.getElementById('filtro-ord').className = `px-2 py-1 rounded ${tipo==='ordinario'?'bg-gray-800 text-white':'bg-white border border-gray-300 text-gray-600'}`;
+    document.getElementById('filtro-ext').className = `px-2 py-1 rounded ${tipo==='extraordinario'?'bg-gray-800 text-white':'bg-white border border-gray-300 text-gray-600'}`;
+    render();
+}
+
+function actualizarMonto(id, val) {
+    const c = conceptos.find(x => x.id === id);
+    if (c) { c.monto = parseFloat(val) || 0; render(); }
+}
+
+function abrirModalConcepto() {
+    document.getElementById('modal-id').value = '';
+    document.getElementById('modal-nombre').value = '';
+    document.getElementById('modal-monto').value = '';
+    document.getElementById('modal-tipo').value = 'ordinario';
+    document.getElementById('modal-rubro').value = 'servicios';
+    document.getElementById('modal-cuotas-total').value = 1;
+    document.getElementById('modal-cuota-actual').value = 1;
+    document.getElementById('modal-obs').value = '';
+    document.getElementById('modal-title').textContent = 'Agregar Concepto';
+    document.getElementById('modal-backdrop').classList.remove('hidden');
+}
+
+function editarConcepto(id) {
+    const c = conceptos.find(x => x.id === id);
+    if (!c) return;
+    document.getElementById('modal-id').value = c.id;
+    document.getElementById('modal-nombre').value = c.nombre;
+    document.getElementById('modal-monto').value = c.monto;
+    document.getElementById('modal-tipo').value = c.tipo;
+    document.getElementById('modal-rubro').value = c.rubro || 'otros';
+    document.getElementById('modal-cuotas-total').value = c.cuotasTotal;
+    document.getElementById('modal-cuota-actual').value = c.cuotaActual;
+    document.getElementById('modal-obs').value = c.obs || '';
+    document.getElementById('modal-title').textContent = 'Editar Concepto';
+    document.getElementById('modal-backdrop').classList.remove('hidden');
+}
+
+function cerrarModal() { document.getElementById('modal-backdrop').classList.add('hidden'); }
+
+function guardarConcepto() {
+    const id = parseInt(document.getElementById('modal-id').value);
+    const nombre = document.getElementById('modal-nombre').value.trim();
+    const monto = parseFloat(document.getElementById('modal-monto').value) || 0;
+    const tipo = document.getElementById('modal-tipo').value;
+    const rubro = document.getElementById('modal-rubro').value;
+    const cuotasTotal = parseInt(document.getElementById('modal-cuotas-total').value) || 1;
+    const cuotaActual = parseInt(document.getElementById('modal-cuota-actual').value) || 1;
+    const obs = document.getElementById('modal-obs').value.trim();
+
+    if (!nombre) { alert('El nombre es obligatorio.'); return; }
+
+    if (id) {
+        const c = conceptos.find(x => x.id === id);
+        if (c) { c.nombre = nombre; c.monto = monto; c.tipo = tipo; c.rubro = rubro; c.cuotasTotal = cuotasTotal; c.cuotaActual = cuotaActual; c.obs = obs; }
+    } else {
+        conceptos.push({ id: nextId++, nombre, rubro, obs, monto, tipo, cuotasTotal, cuotaActual, facturaNro: null, facturaReal: null });
+    }
+    cerrarModal();
+    render();
+}
+
+function eliminarConcepto(id) {
+    if (confirm('¿Eliminar este concepto?')) {
+        conceptos = conceptos.filter(x => x.id !== id);
+        render();
+    }
+}
+
+function duplicarConcepto(id) {
+    const c = conceptos.find(x => x.id === id);
+    if (!c) return;
+    conceptos.push({ ...c, id: nextId++, nombre: c.nombre + ' (copia)', facturaNro: null, facturaReal: null, esAjuste: false });
+    render();
+}
+
+function abrirModalFactura(id) {
+    const c = conceptos.find(x => x.id === id);
+    if (!c) return;
+    document.getElementById('factura-id').value = id;
+    document.getElementById('factura-concepto-nombre').textContent = c.nombre;
+    document.getElementById('factura-concepto-estimado').textContent = fmt(c.monto);
+    document.getElementById('factura-nro').value = '';
+    document.getElementById('factura-monto').value = '';
+    document.getElementById('factura-diferencia-box').classList.add('hidden');
+    document.getElementById('modal-factura-backdrop').classList.remove('hidden');
+
+    document.getElementById('factura-monto').addEventListener('input', function() {
+        const real = parseFloat(this.value) || 0;
+        const dif = real - c.monto;
+        const box = document.getElementById('factura-diferencia-box');
+        if (this.value && dif !== 0) {
+            document.getElementById('factura-diferencia-texto').innerHTML = `Estimado ${fmt(c.monto)} vs. Real ${fmt(real)} → <strong>${dif > 0 ? '+' : ''}${fmt(dif)}</strong>`;
+            box.classList.remove('hidden');
+        } else {
+            box.classList.add('hidden');
+        }
+    }, { once: false });
+}
+
+function cerrarModalFactura() { document.getElementById('modal-factura-backdrop').classList.add('hidden'); }
+
+function vincularFactura() {
+    const id = parseInt(document.getElementById('factura-id').value);
+    const nro = document.getElementById('factura-nro').value.trim();
+    const real = parseFloat(document.getElementById('factura-monto').value);
+    if (!nro) { alert('Ingresá el número de factura.'); return; }
+    if (isNaN(real)) { alert('Ingresá el monto real.'); return; }
+
+    const c = conceptos.find(x => x.id === id);
+    if (c) { c.facturaNro = nro; c.facturaReal = real; }
+    cerrarModalFactura();
+    render();
+}
+
+function desvincularFactura(id) {
+    if (!confirm('¿Desvincular la factura de este concepto?')) return;
+    const c = conceptos.find(x => x.id === id);
+    if (c) { c.facturaNro = null; c.facturaReal = null; }
+    render();
+}
+
+function finalizarPresupuesto() {
+    const pendientes = conceptos.filter(c => c.facturaReal === null && !c.esAjuste);
+    if (pendientes.length > 0) {
+        const msg = pendientes.map(c => `• ${c.nombre} (estimado: ${fmt(c.monto)})`).join('\n');
+        if (!confirm(`⚠️ Los siguientes ${pendientes.length} concepto(s) aún son estimados sin factura real:\n\n${msg}\n\n¿Querés finalizar igualmente con estos estimados?`)) return;
+    }
+    alert('✅ Presupuesto Finalizado.\nAhora podés ir a Liquidaciones para generar el reparto.');
+    window.location.href = 'liquidaciones.html';
+}
+
+// Init
+render();
+</script>
+</body>
+</html>

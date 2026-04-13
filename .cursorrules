@@ -1,0 +1,89 @@
+# ConsorciosPro — Cursor Rules & AI Agent Context
+
+Este archivo provee contexto al agente de IA (Cursor) para desarrollar el sistema ConsorciosPro.
+
+## Proyecto
+- **Nombre:** ConsorciosPro
+- **Cliente:** Oliva Administraciones
+- **Tipo:** Sistema web de administración de consorcios (edificios)
+- **Idioma del sistema:** Español (Argentina)
+- **Idioma del código:** Inglés para código, español para labels/textos de UI
+
+## Stack Tecnológico
+- **Backend:** Laravel 11 + PHP 8.2
+- **Frontend:** Blade + Livewire 3 + Alpine.js
+- **CSS:** TailwindCSS 4
+- **Base de datos:** MySQL 8.0
+- **Servidor:** Apache (Hostinger Cloud)
+
+## Convenciones de Código
+
+### PHP / Laravel
+- Modelos en `app/Models/` con nombres en singular castellanizado: `Consorcio`, `Unidad`, `Presupuesto`, `Liquidacion`
+- Componentes Livewire en `app/Livewire/[Modulo]/` con nombres descriptivos: `ConsorcioList`, `ConsorcioForm`
+- Services en `app/Services/` para lógica de negocio compleja
+- Form Requests para validaciones
+- Migraciones con nombres descriptivos
+- Usar Soft Deletes en tablas principales
+- Usar enums de PHP 8 cuando aplique
+
+### Frontend / Blade
+- Layout principal: `resources/views/layouts/app.blade.php`
+- Vistas Livewire: `resources/views/livewire/[modulo]/`
+- Componentes reutilizables: `resources/views/components/`
+- TailwindCSS utilities-first, NO CSS custom innecesario
+- Alpine.js para interacciones del lado del cliente
+
+### Base de Datos
+- Tablas en plural, snake_case: `consorcios`, `unidades`, `concepto_presupuestos`
+- Campos en snake_case: `nro_cuenta_bancaria`, `fecha_fin_contrato`
+- Foreign keys con `_id` suffix: `consorcio_id`, `presupuesto_id`
+- Decimales financieros: `decimal(12,2)` para montos, `decimal(8,6)` para coeficientes
+
+## Módulos del Sistema
+
+### 1. Consorcios (ABM)
+CRUD de edificios/consorcios con datos bancarios, catastrales y de encargado.
+
+### 2. Unidades Funcionales (ABM)
+Departamentos/PH de cada consorcio. Incluye datos de propietario, inquilino e inmobiliaria. Campos de contacto deben ser amplios (requisito del cliente).
+
+### 3. Presupuestos Mensuales
+Un presupuesto por consorcio/mes con conceptos de gastos. Los conceptos pueden ser ordinarios (inquilinos) o extraordinarios (propietarios). Sistema de cuotas y estimados con ajustes automáticos.
+
+### 4. Liquidación de Expensas
+Motor de cálculo que distribuye conceptos a unidades por 3 métodos:
+- **Coeficiente:** Proporcional al % de copropiedad (con reprorrategeo si se excluyen unidades)
+- **Partes iguales:** Dividido equitativamente
+- **Manual:** % personalizado por unidad
+
+### 5. Gastos y Facturas (parcialmente definido)
+Registro de facturas, pagos y vinculación con presupuestos.
+
+## Diseño UI
+- Sidebar colapsable con navegación
+- Dashboard con tarjetas estilo card-grid
+- Paleta: Azul profundo (#1E3A5F), Verde esmeralda (#059669), fondo gris claro (#F3F4F6)
+- Typography: Inter/sistema
+- Formularios extensos con secciones colapsables
+- Tablas con búsqueda, filtros, paginación usando Livewire
+- Loading: skeleton loaders, nunca pantallas en blanco
+- Diseño profesional y moderno, NO genérico/bootstrap
+
+## Reglas Críticas
+1. **NUNCA** usar los prototipos HTML como base de código del sistema final
+2. Las liquidaciones almacenan **snapshots** de datos (no referencias mutables)
+3. Los coeficientes se reprrorratean al excluir unidades de un concepto
+4. Los campos de contacto deben ser amplios (emails de hasta 500 chars, teléfonos de hasta 200 chars)
+5. Todas las operaciones financieras deben ser auditables
+6. El sistema es single-tenant pero debe diseñarse pensando en futura multi-tenancy (separar lógica, evitar hardcodear datos del cliente)
+7. **TODOS los conceptos del presupuesto son estimados por defecto** hasta que se les asigna una factura real. La presencia de `monto_factura_real` (no NULL) indica que el concepto está confirmado. NO existe un campo `es_estimado` booleano.
+8. El sistema usa **sidebar colapsable** como navegación principal (NO navbar superior)
+9. Frontend confirmado: **Livewire 3 + Alpine.js** (NO Vue/React separado)
+
+## Documentación
+- `docs/01-requisitos-del-sistema.md` — Especificación de requisitos completa
+- `docs/02-arquitectura-del-sistema.md` — Arquitectura y estructura del proyecto
+- `docs/03-modelo-de-datos.md` — ERD y diseño de base de datos
+- `docs/04-reglas-de-negocio.md` — Flujos y fórmulas de cálculo
+- `docs/05-plan-de-fases.md` — Plan de implementación por fases

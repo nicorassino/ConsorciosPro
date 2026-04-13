@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ConsorciosPro - Unidades Funcionales</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                            800: '#166534',
+                            900: '#1E3A5F', // Azul profundo
+                        },
+                        accent: {
+                            500: '#059669', // Verde esmeralda
+                            600: '#047857',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #F3F4F6; }
+        .sidebar { transition: all 0.3s ease; }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+    </style>
+</head>
+<body class="text-gray-800 antialiased font-sans">
+    <div class="flex h-screen overflow-hidden">
+        
+        <!-- Sidebar -->
+        <aside class="w-64 bg-primary-900 text-white flex flex-col shadow-2xl flex-shrink-0 z-20 hidden md:flex">
+            <div class="p-6 flex items-center justify-center border-b border-primary-800/50">
+                <div class="flex flex-col items-center">
+                    <div class="h-10 w-10 bg-white rounded-lg flex items-center justify-center mb-2 shadow-md text-primary-900 font-bold text-xl">CP</div>
+                    <h1 class="text-xl font-bold tracking-wider text-white">Consorcios<span class="text-accent-500">Pro</span></h1>
+                </div>
+            </div>
+            
+            <div class="p-4 flex-1 overflow-y-auto">
+                <nav class="space-y-1">
+                    <a href="index.html" class="flex items-center gap-3 px-3 py-2.5 text-gray-300 hover:bg-primary-800 hover:text-white rounded-lg group transition-colors">
+                        <i class="fas fa-home text-lg"></i>
+                        <span class="font-medium">Dashboard</span>
+                    </a>
+                    
+                    <a href="consorcios.html" class="flex items-center gap-3 px-3 py-2.5 text-gray-300 hover:bg-primary-800 hover:text-white rounded-lg group transition-colors">
+                        <i class="fas fa-building text-lg"></i>
+                        <span class="font-medium">Consorcios</span>
+                    </a>
+                    
+                    <a href="departamentos.html" class="flex items-center gap-3 px-3 py-2.5 bg-accent-600/20 text-accent-500 border-r-4 border-accent-500 rounded-lg group transition-colors">
+                        <i class="fas fa-door-open text-lg"></i>
+                        <span class="font-medium">Unidades Funcionales</span>
+                    </a>
+                    
+                    <div class="mt-8 mb-4">
+                        <p class="text-xs font-semibold text-primary-100/50 uppercase tracking-wider px-3">Gestión Financiera</p>
+                    </div>
+                    
+                    <a href="presupuestos.html" class="flex items-center gap-3 px-3 py-2.5 text-gray-300 hover:bg-primary-800 hover:text-white rounded-lg group transition-colors">
+                        <i class="fas fa-calculator text-lg"></i>
+                        <span class="font-medium">Presupuestos</span>
+                    </a>
+                    
+                    <a href="liquidaciones.html" class="flex items-center gap-3 px-3 py-2.5 text-gray-300 hover:bg-primary-800 hover:text-white rounded-lg group transition-colors">
+                        <i class="fas fa-file-invoice-dollar text-lg"></i>
+                        <span class="font-medium">Liquidaciones</span>
+                    </a>
+                </nav>
+            </div>
+            
+            <div class="p-4 border-t border-primary-800/50 bg-primary-800/20 flex justify-center">
+                <img src="../img/logo_cliente.png" alt="Oliva Administraciones" class="h-20 w-auto max-w-[95%] object-contain bg-white rounded-xl p-3 shadow-sm hover:scale-105 transition-transform">
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col h-screen overflow-hidden">
+            <!-- Top Header -->
+            <header class="bg-white shadow-sm z-10">
+                <div class="flex items-center justify-between px-6 py-4">
+                    <h2 class="text-2xl font-bold text-gray-800">Unidades Funcionales</h2>
+                    <button onclick="document.getElementById('modal-unidad').classList.remove('hidden')" class="bg-accent-600 hover:bg-accent-700 text-white px-4 py-2 rounded-lg font-medium shadow-sm transition-colors flex items-center gap-2">
+                        <i class="fas fa-plus"></i> Nueva Unidad
+                    </button>
+                </div>
+            </header>
+
+            <!-- Scrollable Content -->
+            <main class="flex-1 overflow-y-auto p-6 bg-gray-50">
+                <div class="max-w-7xl mx-auto">
+                    <!-- Top Filters -->
+                    <div class="glass-card rounded-xl shadow-sm border border-gray-100 overflow-hidden mb-6">
+                        <div class="p-4 bg-white flex flex-wrap gap-4 items-center">
+                            <div class="w-full md:w-64">
+                                <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Consorcio</label>
+                                <select class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-500 outline-none transition-all">
+                                    <option value="">Seleccionar Consorcio...</option>
+                                    <option value="1">Edificio San Martín</option>
+                                    <option value="2">Torre Los Arrayanes</option>
+                                </select>
+                            </div>
+                            <div class="flex-1 min-w-[200px]">
+                                <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Buscar Unidad</label>
+                                <div class="relative">
+                                    <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                                    <input type="text" placeholder="Buscar por número, propietario o inquilino..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-500 outline-none transition-all">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Summary Stats (Specific to Consortium if selected) -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6 hidden" id="consorcio-stats">
+                        <div class="bg-white rounded-xl p-4 border border-gray-100 shadow-sm flex items-center gap-4">
+                            <div class="h-10 w-10 rounded-lg bg-blue-50 text-blue-500 flex items-center justify-center">
+                                <i class="fas fa-calculator text-lg"></i>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-500 uppercase font-semibold">Total Coeficientes</p>
+                                <p class="text-lg font-bold text-gray-800">100.00%</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Table -->
+                    <div class="glass-card rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="bg-gray-50 text-gray-500 text-xs uppercase tracking-wider">
+                                        <th class="p-4 font-medium">Unidad</th>
+                                        <th class="p-4 font-medium">Consorcio</th>
+                                        <th class="p-4 font-medium">Propietario</th>
+                                        <th class="p-4 font-medium">Ocupación</th>
+                                        <th class="p-4 font-medium">Cochera</th>
+                                        <th class="p-4 font-medium">Coeficiente</th>
+                                        <th class="p-4 font-medium text-right">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-100 bg-white">
+                                    <!-- Row 1 -->
+                                    <tr class="hover:bg-gray-50 transition-colors">
+                                        <td class="p-4">
+                                            <div class="font-bold text-gray-800 text-lg">1A</div>
+                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-blue-100 text-blue-700">
+                                                Consumidor Final
+                                            </span>
+                                        </td>
+                                        <td class="p-4 text-gray-600">Edificio San Martín</td>
+                                        <td class="p-4">
+                                            <div class="font-medium text-gray-800">Juan Pérez</div>
+                                            <div class="text-xs text-gray-500 truncate max-w-[150px]" title="juan.perez@email.com.ar">juan.perez@email.com.ar</div>
+                                        </td>
+                                        <td class="p-4">
+                                            <div class="font-medium text-gray-800">María López</div>
+                                            <div class="text-xs text-gray-500 truncate max-w-[150px]" title="marialopez90@gmail.com">marialopez90@gmail.com</div>
+                                        </td>
+                                        <td class="p-4"><span class="text-xs font-semibold px-2 py-1 bg-emerald-100 text-emerald-700 rounded-full">C-12</span></td>
+                                        <td class="p-4 font-mono text-gray-700">4.520000%</td>
+                                        <td class="p-4 text-right">
+                                            <button class="text-blue-500 hover:text-blue-700 p-2"><i class="fas fa-edit"></i></button>
+                                            <button class="text-rose-500 hover:text-rose-700 p-2"><i class="fas fa-trash"></i></button>
+                                        </td>
+                                    </tr>
+                                    <!-- Row 2 -->
+                                    <tr class="hover:bg-gray-50 transition-colors">
+                                        <td class="p-4">
+                                            <div class="font-bold text-gray-800 text-lg">1B</div>
+                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-gray-100 text-gray-700">
+                                                Exento
+                                            </span>
+                                        </td>
+                                        <td class="p-4 text-gray-600">Edificio San Martín</td>
+                                        <td class="p-4">
+                                            <div class="font-medium text-gray-800">Carlos Gómez</div>
+                                            <div class="text-xs text-gray-500 truncate max-w-[150px]" title="carlos.gomez@empresa.com">carlos.gomez@empresa.com</div>
+                                        </td>
+                                        <td class="p-4"><span class="text-sm text-blue-700 font-medium">Propietario residente</span></td>
+                                        <td class="p-4"><span class="text-sm text-gray-400 italic">Sin cochera</span></td>
+                                        <td class="p-4 font-mono text-gray-700">3.850000%</td>
+                                        <td class="p-4 text-right">
+                                            <button class="text-blue-500 hover:text-blue-700 p-2"><i class="fas fa-edit"></i></button>
+                                            <button class="text-rose-500 hover:text-rose-700 p-2"><i class="fas fa-trash"></i></button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Modal Form Unidad -->
+    <div id="modal-unidad" class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-5xl max-h-[90vh] overflow-y-auto m-4 flex flex-col">
+            <div class="p-6 border-b border-gray-100 flex justify-between items-center sticky top-0 bg-white z-10">
+                <h3 class="text-xl font-bold text-gray-800">Nueva Unidad Funcional</h3>
+                <button onclick="document.getElementById('modal-unidad').classList.add('hidden')" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <div class="p-6 flex-1 overflow-y-auto">
+                <form class="space-y-8">
+                    
+                    <!-- Datos Unidad -->
+                    <div class="bg-gray-50/50 p-6 rounded-xl border border-gray-100">
+                        <h4 class="text-lg font-semibold text-primary-900 mb-4 flex items-center gap-2"><i class="fas fa-door-open text-primary-600"></i> Datos de la Unidad</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Consorcio *</label>
+                                <select class="w-full p-2 border border-gray-300 rounded-lg outline-none">
+                                    <option>Seleccionar Consorcio...</option>
+                                    <option>Edificio San Martín</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Número Unidad *</label>
+                                <input type="text" class="w-full p-2 border border-gray-300 rounded-lg outline-none" placeholder="Ej: 3B, Local 1">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Coeficiente (%) *</label>
+                                <input type="number" step="0.000001" class="w-full p-2 border border-gray-300 rounded-lg outline-none" placeholder="0.000000">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Nro PH</label>
+                                <input type="text" class="w-full p-2 border border-gray-300 rounded-lg outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Nro Cuenta Rentas</label>
+                                <input type="text" class="w-full p-2 border border-gray-300 rounded-lg outline-none">
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Nomenclatura Catastral</label>
+                                <input type="text" class="w-full p-2 border border-gray-300 rounded-lg outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Estado de Ocupación</label>
+                                <select class="w-full p-2 border border-gray-300 rounded-lg outline-none">
+                                    <option>Inquilino</option>
+                                    <option>Propietario residente</option>
+                                    <option>Desocupado</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="inline-flex items-center gap-2 text-sm text-gray-700 mt-7">
+                                    <input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-accent-600 focus:ring-accent-500">
+                                    Tiene cochera
+                                </label>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Nro Cochera</label>
+                                <input type="text" class="w-full p-2 border border-gray-300 rounded-lg outline-none" placeholder="Ej: C-12">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Nro Cupón SIRO</label>
+                                <input type="text" class="w-full p-2 border border-gray-300 rounded-lg outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Código Pago Electrónico</label>
+                                <input type="text" class="w-full p-2 border border-gray-300 rounded-lg outline-none">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Configuración Facturación -->
+                    <div class="bg-amber-50/30 p-6 rounded-xl border border-amber-100">
+                        <h4 class="text-lg font-semibold text-amber-800 mb-4 flex items-center gap-2"><i class="fas fa-file-invoice text-amber-600"></i> Facturación y Recibos</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Generar Recibo a nombre de *</label>
+                                <select class="w-full p-2 border border-gray-300 rounded-lg outline-none">
+                                    <option value="inquilino">Inquilino (si existe, sino Propietario)</option>
+                                    <option value="propietario">Propietario siempre</option>
+                                    <option value="inmobiliaria">Inmobiliaria</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Condición de IVA *</label>
+                                <select class="w-full p-2 border border-gray-300 rounded-lg outline-none">
+                                    <option value="consumidor_final">Consumidor Final</option>
+                                    <option value="responsable_inscripto">Responsable Inscripto</option>
+                                    <option value="exento">Exento</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Emails Expensas Ordinarias</label>
+                                <textarea class="w-full p-2 border border-gray-300 rounded-lg outline-none text-sm" rows="2" placeholder="Separar múltiples emails con coma..."></textarea>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Emails Expensas Extraordinarias</label>
+                                <textarea class="w-full p-2 border border-gray-300 rounded-lg outline-none text-sm" rows="2" placeholder="Separar múltiples emails con coma..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Datos Propietario -->
+                    <div class="bg-blue-50/30 p-6 rounded-xl border border-blue-100">
+                        <h4 class="text-lg font-semibold text-blue-900 mb-4 flex items-center gap-2"><i class="fas fa-user-tie text-blue-600"></i> Datos del Propietario</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Nombre Completo *</label>
+                                <input type="text" class="w-full p-2 border border-gray-300 rounded-lg outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">DNI / CUIT</label>
+                                <input type="text" class="w-full p-2 border border-gray-300 rounded-lg outline-none">
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Emails (Amplio)</label>
+                                <textarea class="w-full p-2 border border-gray-300 rounded-lg outline-none text-sm" rows="2" placeholder="juan@email.com, contaduria@empresa.com..."></textarea>
+                            </div>
+                            <div class="md:col-span-1">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Teléfonos (Amplio)</label>
+                                <textarea class="w-full p-2 border border-gray-300 rounded-lg outline-none text-sm" rows="2" placeholder="Cel: 351... Fijo: ..."></textarea>
+                            </div>
+                            <div class="md:col-span-3">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Dirección Postal</label>
+                                <input type="text" class="w-full p-2 border border-gray-300 rounded-lg outline-none">
+                            </div>
+                        </div>
+                        <div class="mt-4 border-t border-blue-200 pt-4">
+                            <div class="flex items-center justify-between mb-3">
+                                <p class="text-sm font-semibold text-blue-800">Contactos Alternativos (Propietario)</p>
+                                <button type="button" class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-md font-semibold">+ Agregar contacto</button>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                <input type="text" class="w-full p-2 border border-gray-300 rounded-lg outline-none text-sm" placeholder="Nombre">
+                                <input type="text" class="w-full p-2 border border-gray-300 rounded-lg outline-none text-sm" placeholder="Teléfono">
+                                <input type="email" class="w-full p-2 border border-gray-300 rounded-lg outline-none text-sm" placeholder="Email">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Toggle Inquilino / Inmobiliaria (Simplificado para el prototipo) -->
+                    <div class="border-t border-gray-200 pt-6">
+                        <div class="bg-emerald-50/30 p-6 rounded-xl border border-emerald-100 mb-4">
+                            <h4 class="text-lg font-semibold text-emerald-900 mb-4 flex items-center gap-2"><i class="fas fa-user text-emerald-600"></i> Datos del Inquilino</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <input type="text" class="w-full p-2 border border-gray-300 rounded-lg outline-none" placeholder="Nombre">
+                                <input type="text" class="w-full p-2 border border-gray-300 rounded-lg outline-none" placeholder="Apellido">
+                                <input type="text" class="w-full p-2 border border-gray-300 rounded-lg outline-none" placeholder="Teléfono">
+                                <input type="email" class="w-full p-2 border border-gray-300 rounded-lg outline-none md:col-span-2" placeholder="Email">
+                                <input type="date" class="w-full p-2 border border-gray-300 rounded-lg outline-none" placeholder="Fecha fin contrato">
+                                <input type="text" class="w-full p-2 border border-gray-300 rounded-lg outline-none md:col-span-3" placeholder="Dirección postal inquilino">
+                            </div>
+                            <div class="mt-4 border-t border-emerald-200 pt-4">
+                                <div class="flex items-center justify-between mb-3">
+                                    <p class="text-sm font-semibold text-emerald-800">Contactos Alternativos (Inquilino)</p>
+                                    <button type="button" class="text-xs bg-emerald-100 text-emerald-700 px-2 py-1 rounded-md font-semibold">+ Agregar contacto</button>
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                    <input type="text" class="w-full p-2 border border-gray-300 rounded-lg outline-none text-sm" placeholder="Nombre">
+                                    <input type="text" class="w-full p-2 border border-gray-300 rounded-lg outline-none text-sm" placeholder="Teléfono">
+                                    <input type="email" class="w-full p-2 border border-gray-300 rounded-lg outline-none text-sm" placeholder="Email">
+                                </div>
+                            </div>
+                        </div>
+                        <button type="button" class="text-accent-600 font-medium hover:text-accent-700 flex items-center gap-2 mb-4">
+                            <i class="fas fa-plus-circle"></i> Agregar Inquilino (Opcional)
+                        </button>
+                        <button type="button" class="text-purple-600 font-medium hover:text-purple-700 flex items-center gap-2">
+                            <i class="fas fa-plus-circle"></i> Agregar Inmobiliaria (Opcional)
+                        </button>
+                    </div>
+
+                </form>
+            </div>
+            
+            <div class="p-6 border-t border-gray-100 bg-gray-50 flex justify-end gap-3 sticky bottom-0">
+                <button onclick="document.getElementById('modal-unidad').classList.add('hidden')" class="px-5 py-2 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-100 transition-colors">Cancelar</button>
+                <button class="px-5 py-2 bg-accent-600 rounded-lg text-white font-medium hover:bg-accent-700 transition-colors shadow-sm">Guardar Unidad</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

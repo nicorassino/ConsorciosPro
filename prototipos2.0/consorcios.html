@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ConsorciosPro - Consorcios</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: { 50: '#f0fdf4', 100: '#dcfce7', 500: '#22c55e', 600: '#16a34a', 700: '#15803d', 800: '#166534', 900: '#1E3A5F' },
+                        accent: { 500: '#059669', 600: '#047857' }
+                    },
+                    fontFamily: { sans: ['Inter', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #F3F4F6; }
+        .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); }
+    </style>
+</head>
+<body class="text-gray-800 antialiased font-sans flex h-screen overflow-hidden">
+    
+    <!-- Sidebar (Same as dashboard) -->
+    <aside class="w-64 bg-primary-900 text-white flex flex-col shadow-2xl flex-shrink-0 z-20 hidden md:flex">
+        <div class="p-6 flex items-center justify-center border-b border-primary-800/50">
+            <div class="flex flex-col items-center">
+                <div class="h-10 w-10 bg-white rounded-lg flex items-center justify-center mb-2 shadow-md text-primary-900 font-bold text-xl">CP</div>
+                <h1 class="text-xl font-bold tracking-wider text-white">Consorcios<span class="text-accent-500">Pro</span></h1>
+            </div>
+        </div>
+        <div class="p-4 flex-1 overflow-y-auto">
+            <nav class="space-y-1">
+                <a href="index.html" class="flex items-center gap-3 px-3 py-2.5 text-gray-300 hover:bg-primary-800 hover:text-white rounded-lg group transition-colors">
+                    <i class="fas fa-home text-lg group-hover:text-amber-400"></i> <span class="font-medium">Dashboard</span>
+                </a>
+                <a href="consorcios.html" class="flex items-center gap-3 px-3 py-2.5 bg-accent-600/20 text-accent-500 border-r-4 border-accent-500 rounded-lg group transition-colors">
+                    <i class="fas fa-building text-lg"></i> <span class="font-medium">Consorcios</span>
+                </a>
+                <a href="departamentos.html" class="flex items-center gap-3 px-3 py-2.5 text-gray-300 hover:bg-primary-800 hover:text-white rounded-lg group transition-colors">
+                    <i class="fas fa-door-open text-lg group-hover:text-blue-400"></i> <span class="font-medium">Unidades Funcionales</span>
+                </a>
+                <a href="presupuestos.html" class="flex items-center gap-3 px-3 py-2.5 text-gray-300 hover:bg-primary-800 hover:text-white rounded-lg group transition-colors mt-4">
+                    <i class="fas fa-calculator text-lg group-hover:text-purple-400"></i> <span class="font-medium">Presupuestos</span>
+                </a>
+                <a href="liquidaciones.html" class="flex items-center gap-3 px-3 py-2.5 text-gray-300 hover:bg-primary-800 hover:text-white rounded-lg group transition-colors">
+                    <i class="fas fa-file-invoice-dollar text-lg group-hover:text-emerald-400"></i> <span class="font-medium">Liquidaciones</span>
+                </a>
+            </nav>
+        </div>
+        
+        <div class="p-4 border-t border-primary-800/50 bg-primary-800/20 flex justify-center">
+            <img src="../img/logo_cliente.png" alt="Oliva Administraciones" class="h-20 w-auto max-w-[95%] object-contain bg-white rounded-xl p-3 shadow-sm hover:scale-105 transition-transform">
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="flex-1 flex flex-col h-screen overflow-hidden">
+        <!-- Header -->
+        <header class="bg-white shadow-sm z-10">
+            <div class="flex items-center justify-between px-6 py-4">
+                <h2 class="text-2xl font-bold text-gray-800">Consorcios</h2>
+                <button onclick="document.getElementById('modal-consorcio').classList.remove('hidden')" class="bg-accent-600 hover:bg-accent-700 text-white px-4 py-2 rounded-lg font-medium shadow-sm transition-colors flex items-center gap-2">
+                    <i class="fas fa-plus"></i> Nuevo Consorcio
+                </button>
+            </div>
+        </header>
+
+        <!-- Content -->
+        <main class="flex-1 overflow-y-auto p-6 bg-gray-50">
+            <div class="max-w-7xl mx-auto">
+                <div class="glass-card rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                    <!-- Filters -->
+                    <div class="p-4 border-b border-gray-100 bg-white flex justify-between items-center gap-4">
+                        <div class="relative flex-1 max-w-md">
+                            <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                            <input type="text" placeholder="Buscar por nombre, CUIT o dirección..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-500 focus:border-accent-500 outline-none transition-all">
+                        </div>
+                    </div>
+
+                    <!-- Table -->
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-gray-50 text-gray-500 text-xs uppercase tracking-wider">
+                                    <th class="p-4 font-medium">Consorcio</th>
+                                    <th class="p-4 font-medium">Unidades</th>
+                                    <th class="p-4 font-medium">Banco</th>
+                                    <th class="p-4 font-medium text-right">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100 bg-white">
+                                <!-- Row 1 -->
+                                <tr class="hover:bg-gray-50 transition-colors">
+                                    <td class="p-4">
+                                        <div class="font-bold text-gray-800">Edificio San Martín</div>
+                                        <div class="text-sm text-gray-500">CUIT: 30-71234567-8 • San Martín 1234</div>
+                                    </td>
+                                    <td class="p-4 text-gray-600">24 u.f.</td>
+                                    <td class="p-4 text-gray-600">ROELA S.A.</td>
+                                    <td class="p-4 text-right">
+                                        <button class="text-blue-500 hover:text-blue-700 p-2"><i class="fas fa-edit"></i></button>
+                                        <button class="text-rose-500 hover:text-rose-700 p-2"><i class="fas fa-trash"></i></button>
+                                    </td>
+                                </tr>
+                                <!-- Row 2 -->
+                                <tr class="hover:bg-gray-50 transition-colors">
+                                    <td class="p-4">
+                                        <div class="font-bold text-gray-800">Torre Los Arrayanes</div>
+                                        <div class="text-sm text-gray-500">CUIT: 30-78901234-5 • Av. Libertador 4567</div>
+                                    </td>
+                                    <td class="p-4 text-gray-600">36 u.f.</td>
+                                    <td class="p-4 text-gray-600">ROELA S.A.</td>
+                                    <td class="p-4 text-right">
+                                        <button class="text-blue-500 hover:text-blue-700 p-2"><i class="fas fa-edit"></i></button>
+                                        <button class="text-rose-500 hover:text-rose-700 p-2"><i class="fas fa-trash"></i></button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal Form Consorcio -->
+    <div id="modal-consorcio" class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto m-4">
+            <div class="p-6 border-b border-gray-100 flex justify-between items-center sticky top-0 bg-white z-10">
+                <h3 class="text-xl font-bold text-gray-800">Nuevo Consorcio</h3>
+                <button onclick="document.getElementById('modal-consorcio').classList.add('hidden')" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <div class="p-6">
+                <form class="space-y-8">
+                    <!-- Sección 1 -->
+                    <div>
+                        <h4 class="text-lg font-semibold text-primary-900 border-b pb-2 mb-4">Datos Generales</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Nombre del Consorcio *</label>
+                                <input type="text" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-500 outline-none" placeholder="Ej: Torre Los Andes">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">CUIT *</label>
+                                <input type="text" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-500 outline-none" placeholder="XX-XXXXXXXX-X">
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Dirección *</label>
+                                <input type="text" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-500 outline-none">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sección 2 -->
+                    <div>
+                        <h4 class="text-lg font-semibold text-primary-900 border-b pb-2 mb-4">Datos Bancarios</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Banco</label>
+                                <input type="text" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-500 outline-none" value="ROELA S.A.">
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">CBU</label>
+                                <input type="text" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-500 outline-none" placeholder="22 dígitos">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Nro Cuenta</label>
+                                <input type="text" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-500 outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Sucursal</label>
+                                <input type="text" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-500 outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Convenio</label>
+                                <input type="text" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-500 outline-none">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h4 class="text-lg font-semibold text-primary-900 border-b pb-2 mb-4">Identificación Legal y Catastral</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Nro Matrícula</label>
+                                <input type="text" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-500 outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Fecha Inscripción Reglamento</label>
+                                <input type="date" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-500 outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Unidad Facturación A. Cbesas</label>
+                                <input type="text" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-500 outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Nro Cuenta Rentas</label>
+                                <input type="text" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-500 outline-none">
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Nomenclatura Catastral</label>
+                                <input type="text" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-500 outline-none">
+                            </div>
+                            <div class="md:col-span-3">
+                                <label class="inline-flex items-center gap-2 text-sm text-gray-700">
+                                    <input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-accent-600 focus:ring-accent-500">
+                                    El consorcio tiene cocheras
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h4 class="text-lg font-semibold text-primary-900 border-b pb-2 mb-4">Encargado del Edificio</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
+                                <input type="text" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-500 outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Apellido</label>
+                                <input type="text" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-500 outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
+                                <input type="text" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-500 outline-none">
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Horarios de Atención</label>
+                                <textarea class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-500 outline-none text-sm" rows="2"></textarea>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Días</label>
+                                <input type="text" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-500 outline-none" placeholder="Lun a Vie, Sábados...">
+                            </div>
+                            <div class="md:col-span-3">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Empresa de Servicio</label>
+                                <input type="text" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-500 outline-none">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h4 class="text-lg font-semibold text-primary-900 border-b pb-2 mb-4">Configuración de Cupón SIRO</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Nombre Administración</label>
+                                <input type="text" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-500 outline-none" value="Administracion OLIVA">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Condición IVA</label>
+                                <select class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-500 outline-none">
+                                    <option>IVA No Alcanzado</option>
+                                    <option>Exento</option>
+                                    <option>Responsable Inscripto</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Recargo 2do Vto (%)</label>
+                                <input type="number" step="0.01" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-500 outline-none" value="1.80">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Día 1er Vto</label>
+                                <input type="number" min="1" max="28" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-500 outline-none" value="10">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Día 2do Vto</label>
+                                <input type="number" min="1" max="28" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-500 outline-none" value="28">
+                            </div>
+                            <div class="md:col-span-3">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Leyenda Medios de Pago</label>
+                                <textarea class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-500 outline-none text-sm" rows="2">Rapipago, PagoFacil, Cobro Express, Pago Mis Cuentas, Banelco, Red Link, MODO y Mercado Pago.</textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+            
+            <div class="p-6 border-t border-gray-100 bg-gray-50 flex justify-end gap-3 sticky bottom-0">
+                <button onclick="document.getElementById('modal-consorcio').classList.add('hidden')" class="px-5 py-2 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-100 transition-colors">Cancelar</button>
+                <button class="px-5 py-2 bg-accent-600 rounded-lg text-white font-medium hover:bg-accent-700 transition-colors shadow-sm">Guardar Consorcio</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
