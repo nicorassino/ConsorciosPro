@@ -164,7 +164,7 @@
                     <!-- Sección 2 -->
                     <div>
                         <h4 class="text-lg font-semibold text-primary-900 border-b pb-2 mb-4">Datos Bancarios</h4>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Banco</label>
                                 <input type="text" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-500 outline-none" value="ROELA S.A.">
@@ -174,7 +174,7 @@
                                 <input type="text" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-500 outline-none" placeholder="22 dígitos">
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Nro Cuenta</label>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Nro Cuenta Bancaria</label>
                                 <input type="text" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-500 outline-none">
                             </div>
                             <div>
@@ -183,6 +183,10 @@
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Convenio</label>
+                                <input type="text" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-500 outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Dígito Verificador</label>
                                 <input type="text" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-500 outline-none">
                             </div>
                         </div>
@@ -200,7 +204,7 @@
                                 <input type="date" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-500 outline-none">
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Unidad Facturación A. Cbesas</label>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Unidad Facturación Aguas</label>
                                 <input type="text" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-500 outline-none">
                             </div>
                             <div>
@@ -277,9 +281,29 @@
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Día 2do Vto</label>
                                 <input type="number" min="1" max="28" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-500 outline-none" value="28">
                             </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Logo Administración (URL/Path)</label>
+                                <input type="text" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-500 outline-none" placeholder="/uploads/logo-admin.png">
+                            </div>
                             <div class="md:col-span-3">
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Leyenda Medios de Pago</label>
                                 <textarea class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-500 outline-none text-sm" rows="2">Rapipago, PagoFacil, Cobro Express, Pago Mis Cuentas, Banelco, Red Link, MODO y Mercado Pago.</textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h4 class="text-lg font-semibold text-primary-900 border-b pb-2 mb-4">Estado y Observaciones</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="md:col-span-3">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Nota</label>
+                                <textarea class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-500 outline-none text-sm" rows="3" placeholder="Notas internas del consorcio..."></textarea>
+                            </div>
+                            <div class="md:col-span-3">
+                                <label class="inline-flex items-center gap-2 text-sm text-gray-700">
+                                    <input type="checkbox" checked class="h-4 w-4 rounded border-gray-300 text-accent-600 focus:ring-accent-500">
+                                    Consorcio activo
+                                </label>
                             </div>
                         </div>
                     </div>
