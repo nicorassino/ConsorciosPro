@@ -1,10 +1,10 @@
 # ConsorciosPro — Documento de Requisitos del Sistema (SRS)
 
 **Cliente:** Oliva Administraciones
-**Versión:** 1.3
-**Fecha:** 2026-03-23
-**Última actualización:** 2026-04-13 — Ajustes por devolución cliente (campos legales, cocheras, coeficientes múltiples y cupón SIRO)
-**Fuente:** 2 reuniones con el cliente + análisis de prototipos
+**Versión:** 1.4
+**Fecha:** 2026-04-24
+**Última actualización:** 2026-04-24 — Ajustes por devolución cliente (recargos diarios, cocheras, facturas reales, informes y envío de cupones)
+**Fuente:** 3 reuniones con el cliente + análisis de prototipos
 
 ---
 
@@ -47,9 +47,9 @@ Gestión completa (Alta, Baja, Modificación) de los consorcios administrados.
 | Nombre administración | `string(255)` | No | Ej: Administracion OLIVA |
 | Logo administración | `string(500)` | No | Path/archivo |
 | Texto medios de pago | `text` | No | Leyenda de canales habilitados |
-| Día 1er vencimiento | `integer` | No | 1-28 |
-| Día 2do vencimiento | `integer` | No | 1-28 |
-| Recargo 2do vencimiento (%) | `decimal(5,2)` | No | Aplica sobre total del cupón |
+| Día 1er vencimiento | `integer` | No | 1-28 (Valor nominal) |
+| Día 2do vencimiento | `integer` | No | 1-28 (Valor nominal) |
+| Recargo 2do vencimiento (%) | `decimal(5,2)` | No | Valor nominal. Interés mensual para prorrateo diario |
 | Nota | `text` | No | Texto largo |
 
 ### 2.2 ABM Unidades Funcionales (Departamentos/PH)
@@ -65,7 +65,7 @@ Cada unidad pertenece a un consorcio. La tabla de datos es extensa y los campos 
 | Coeficiente de copropiedad | `decimal(8,6)` | ✅ | Porcentaje (ej: 4.523100) |
 | Nomenclatura catastral | `string(100)` | No | |
 | Nro cuenta rentas | `string(50)` | No | |
-| Tiene cochera | `boolean` | No | |
+| Tiene cochera | `boolean` | No | Solo si el consorcio tiene cocheras habilitadas |
 | Nro cochera | `string(20)` | No | Opcional, si aplica |
 | Estado ocupación | `enum` | No | propietario_residente / inquilino / desocupado |
 | Nro cupón SIRO | `string(20)` | No | Identificador por unidad |
@@ -133,6 +133,9 @@ El presupuesto es el corazón del flujo financiero. Define los gastos del mes pa
 | Consorcio | `FK` | Relación con consorcio |
 | Mes/Año | `date` | Período del presupuesto |
 | Estado | `enum` | borrador / finalizado / liquidado |
+| Día 1er vencimiento (Real) | `integer` | Valor real a aplicar este mes (por defecto nominal) |
+| Día 2do vencimiento (Real) | `integer` | Valor real a aplicar este mes (por defecto nominal) |
+| Recargo (%) (Real) | `decimal(5,2)` | Valor real de interés mensual para este mes |
 
 **Campos de cada Concepto del Presupuesto:**
 
@@ -172,6 +175,7 @@ La liquidación toma un presupuesto finalizado y calcula cuánto debe pagar cada
 8. Se pueden crear **múltiples conjuntos de coeficientes** por consorcio (ej: Reglamento, Sin Locales, Cocheras)
 9. Cada concepto distribuido por coeficiente debe permitir elegir el conjunto de coeficientes a usar
 10. El conjunto elegido se guarda como snapshot en la liquidación para trazabilidad
+11. **Filtro exclusivo de cocheras:** Se requiere un botón de acceso directo en la liquidación para excluir automáticamente a las unidades sin cochera al cargar un gasto de ese sector. Al usar este filtro: se bloquea la liquidación por coeficiente, se selecciona "partes iguales" por defecto, y se permite distribución "manual".
 
 ### 2.5 Pagos y Recaudación (Plataforma SIRO)
 
@@ -183,26 +187,38 @@ La liquidación toma un presupuesto finalizado y calcula cuánto debe pagar cada
    - Ver números de emergencia
    - Ver datos de contacto del encargado del edificio
 3. **Manejo de Deuda:** Las deudas de meses anteriores **NO se agrupan** en el cupón del mes corriente. Se debe generar un cupón independiente por cada mes adeudado.
-4. **Estructura del Cupón:** Debe incluir logo/administración, datos del consorcio (nombre, dirección, CUIT, condición IVA), datos bancarios (CBU, cuenta recaudadora), número SIRO, departamento, período, código de pago electrónico, código de barras y leyenda de medios de pago.
-5. **Vencimientos:** Debe mostrar 1er y 2do vencimiento con montos diferenciados, aplicando recargo configurable en 2do vencimiento.
-6. **Sin desglose de conceptos:** El cupón no detalla conceptos presupuestados.
-7. **Rendición separada:** Los gastos efectivamente pagados se muestran en una vista específica de rendición, separada del cupón.
+4. **Estructura del Cupón:** Debe incluir logo/administración, datos del consorcio (nombre, dirección, CUIT, condición IVA), datos bancarios (cuenta recaudadora - **EXCLUIR CBU**), número SIRO, departamento, período, código de pago electrónico, código de barras/QR (para facilitar acreditación inmediata) y leyenda de medios de pago.
+5. **Vencimientos e Interés Diario:** La configuración es "dual" (nominal en consorcio, real en presupuesto). El cálculo del recargo es **diario y prorrateado** (mes de 30 días) a partir del primer vencimiento.
+   - Pago hasta 1er vto: sin recargo.
+   - Pago entre 1er y 2do vto: cobra días transcurridos desde 1er vto (días * % / 30).
+   - Pago post 2do vto: interés por día transcurrido desde 1er vto.
+   - El cupón mostrará dos opciones ("dos plazas"): el monto neto (1er vto) y el monto con recargo al 2do vto.
+6. **Sin desglose de conceptos:** El cupón de pago no detalla conceptos presupuestados (los gastos se detallan en el balance adjunto).
+7. **Envío de Cupones por Mail:** Cada cupón se enviará por mail en un PDF que incluirá:
+   - **Cupón de pago (Expensa):** Con QR y dos vencimientos.
+   - **Informe Económico (Balance):** Editable y aprobable antes del envío. Incluye detalle minucioso de gastos y notas variables (ej. justificación de aumentos).
+   - **Cuerpo Administrativo / Notas:** Información fija extraída del campo "Nota" del consorcio (normas de convivencia, teléfonos del encargado, etc).
 
-### 2.6 Gastos y Facturas (definición parcial — pendiente de más detalle)
+### 2.6 Carga de Gastos (Facturas)
 
-Flujo actual del cliente (manual):
-1. Facturas llegan por correo → se descargan
-2. Se anotan en Excel: proveedor, importe, periodo
-3. Al pagar, se guarda comprobante de transferencia
-4. Factura y pago reciben mismo Nro de Orden
-5. Se marcan como pagadas ("R") en carpeta GASTOS
-6. Antes de liquidar: actualizar presupuestos con facturas reales
+1. **Pantalla Independiente:** Existe una pantalla separada para la carga de comprobantes por mes y por concepto, independiente de la vista de armado del presupuesto.
+2. **Vinculación y Ajuste Automático:** Al cargar una factura real, el sistema debe detectar automáticamente la diferencia con el monto estimado y generar el ajuste para el presupuesto del mes siguiente, indicando al usuario el ajuste creado.
+3. **Desglose de Conceptos:** Una misma factura (ej. abono de ascensores) debe poder distribuirse en múltiples conceptos (ej. abono mensual y reparaciones extra).
 
-> ⚠️ **REQUIERE MÁS DETALLE**: Es necesaria una tercera reunión para definir completamente este módulo. El sistema debe digitalizar este flujo.
+### 2.7 Informes y Comunicación
 
-### 2.6 ~~ABM Conceptos~~ — ELIMINADO
-
-Los conceptos se crean directamente dentro del presupuesto. No existe catálogo global de conceptos.
+1. **Informe Económico Mensual (Balance):**
+   - **Detalle de Gastos:** Desglose minucioso de todos los egresos realizados en el período.
+   - **Flujo de Caja y Bancos:** Saldo inicial (efectivo y cuentas bancarias), ingresos totales por cobranza y egresos, para determinar el saldo final.
+   - **Discriminación de Ingresos:** Diferenciar cuánto dinero ingresado corresponde a expensas de meses específicos (ej. abril, marzo) y cuánto se recaudó por intereses y recargos por mora.
+2. **Gestión de Deuda y Cobranzas:**
+   - **Detalle de Deudores:** Listado completo de consorcistas con deudas.
+   - **Deudas del Consorcio:** Reporte de compromisos pendientes con proveedores (lo que el edificio debe pagar).
+   - **Estadísticas de Gestión:** Reportes con estadísticas de cobro, gastos y deuda para visión analítica.
+3. **Control de Fondos y Conciliación:**
+   - Reporte/grilla para conciliar el saldo bancario con las deudas pendientes, permitiendo saber en tiempo real si hay fondos suficientes antes de autorizar pagos.
+4. **Informe Administrativo y de Autogestión:**
+   - Anexado al cupón de pago, cuenta con un cuerpo económico (gastos y recaudación) y un cuerpo administrativo (estadísticas, teléfonos útiles, extractos de reglamento).
 
 ---
 
