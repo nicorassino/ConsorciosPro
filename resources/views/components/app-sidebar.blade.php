@@ -38,11 +38,15 @@
             </a>
 
             <a
-                href="#"
-                class="flex items-center gap-3 px-3 py-2.5 text-gray-300 hover:bg-primary-800 hover:text-white rounded-lg group transition-colors opacity-70 pointer-events-none cursor-not-allowed"
-                title="Próximamente"
+                href="{{ route('unidades.index') }}"
+                wire:navigate
+                @class([
+                    'flex items-center gap-3 px-3 py-2.5 rounded-lg group transition-colors',
+                    'bg-accent-600/20 text-accent-500 border-r-4 border-accent-500' => $active === 'unidades',
+                    'text-gray-300 hover:bg-primary-800 hover:text-white' => $active !== 'unidades',
+                ])
             >
-                <i class="fas fa-door-open text-lg group-hover:text-blue-400 transition-colors"></i>
+                <i class="fas fa-door-open text-lg @if($active !== 'unidades') group-hover:text-blue-400 @endif transition-colors"></i>
                 <span class="font-medium">Unidades Funcionales</span>
             </a>
 
@@ -51,22 +55,29 @@
             </div>
 
             <a
-                href="#"
-                class="flex items-center gap-3 px-3 py-2.5 text-gray-300 hover:bg-primary-800 hover:text-white rounded-lg group transition-colors opacity-70 pointer-events-none cursor-not-allowed"
-                title="Próximamente"
+                href="{{ route('presupuestos.index') }}"
+                wire:navigate
+                @class([
+                    'flex items-center gap-3 px-3 py-2.5 rounded-lg group transition-colors',
+                    'bg-accent-600/20 text-accent-500 border-r-4 border-accent-500' => $active === 'presupuestos',
+                    'text-gray-300 hover:bg-primary-800 hover:text-white' => $active !== 'presupuestos',
+                ])
             >
-                <i class="fas fa-calculator text-lg group-hover:text-purple-400 transition-colors"></i>
+                <i class="fas fa-calculator text-lg @if($active !== 'presupuestos') group-hover:text-purple-400 @endif transition-colors"></i>
                 <span class="font-medium">Presupuestos</span>
             </a>
 
             <a
-                href="#"
-                class="flex items-center gap-3 px-3 py-2.5 text-gray-300 hover:bg-primary-800 hover:text-white rounded-lg group transition-colors opacity-70 pointer-events-none cursor-not-allowed"
-                title="Próximamente"
+                href="{{ route('liquidaciones.index') }}"
+                wire:navigate
+                @class([
+                    'flex items-center gap-3 px-3 py-2.5 rounded-lg group transition-colors',
+                    'bg-accent-600/20 text-accent-500 border-r-4 border-accent-500' => $active === 'liquidaciones',
+                    'text-gray-300 hover:bg-primary-800 hover:text-white' => $active !== 'liquidaciones',
+                ])
             >
-                <i class="fas fa-file-invoice-dollar text-lg group-hover:text-emerald-400 transition-colors"></i>
+                <i class="fas fa-file-invoice-dollar text-lg @if($active !== 'liquidaciones') group-hover:text-emerald-400 @endif transition-colors"></i>
                 <span class="font-medium">Liquidaciones</span>
-                <span class="ml-auto bg-rose-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">2</span>
             </a>
 
             <a

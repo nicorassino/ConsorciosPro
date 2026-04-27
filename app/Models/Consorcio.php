@@ -61,4 +61,9 @@ class Consorcio extends Model
     {
         return $this->hasMany(Unidad::class);
     }
+
+    public function presupuestos(): HasMany
+    {
+        return $this->hasMany(Presupuesto::class);
+    }
 }

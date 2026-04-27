@@ -38,6 +38,15 @@ class LoginForm extends Form
             ]);
         }
 
+        if (! auth()->user()?->isAdmin()) {
+            Auth::logout();
+            RateLimiter::hit($this->throttleKey());
+
+            throw ValidationException::withMessages([
+                'form.email' => 'Solo los usuarios administradores pueden ingresar.',
+            ]);
+        }
+
         RateLimiter::clear($this->throttleKey());
     }
 

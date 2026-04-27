@@ -14,6 +14,12 @@
 
     <main class="flex-1 overflow-y-auto p-6 bg-gray-50 min-h-0">
         <div class="max-w-7xl mx-auto">
+            @if (session('status'))
+                <div class="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+                    {{ session('status') }}
+                </div>
+            @endif
+
             <div class="glass-card rounded-xl shadow-sm border border-gray-100 overflow-hidden">
                 <div class="p-4 border-b border-gray-100 bg-white flex justify-between items-center gap-4">
                     <div class="relative flex-1 max-w-md">
@@ -103,6 +109,17 @@
                 </div>
 
                 <form wire:submit.prevent="save" class="p-6 space-y-8">
+                    @if ($errors->any())
+                        <div class="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">
+                            <p class="font-semibold mb-1">No se pudo guardar. Revisá estos campos:</p>
+                            <ul class="list-disc pl-5 space-y-1">
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
                     <div>
                         <h4 class="text-lg font-semibold text-primary-900 border-b pb-2 mb-4">Datos Generales</h4>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">

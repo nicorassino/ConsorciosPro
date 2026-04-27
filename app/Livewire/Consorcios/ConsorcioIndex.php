@@ -203,8 +203,12 @@ class ConsorcioIndex extends Component
 
         if ($this->editingId) {
             Consorcio::query()->findOrFail($this->editingId)->update($data);
+            session()->flash('status', 'Consorcio actualizado correctamente.');
         } else {
             Consorcio::query()->create($data);
+            $this->resetPage();
+            $this->search = '';
+            session()->flash('status', 'Consorcio creado correctamente.');
         }
 
         $this->closeModal();

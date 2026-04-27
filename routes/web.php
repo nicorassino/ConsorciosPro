@@ -1,21 +1,39 @@
 <?php
 
 use App\Livewire\Consorcios\ConsorcioIndex;
+use App\Livewire\Liquidaciones\LiquidacionIndex;
+use App\Livewire\Presupuestos\PresupuestoEditor;
+use App\Livewire\Presupuestos\PresupuestoIndex;
+use App\Livewire\Unidades\UnidadIndex;
 use Illuminate\Support\Facades\Route;
 
 Route::view('/', 'welcome');
 
-Route::view('dashboard', 'dashboard')
-    ->middleware(['auth', 'verified'])
-    ->name('dashboard');
+Route::middleware(['auth', 'verified', 'admin'])->group(function () {
+    Route::view('dashboard', 'dashboard')
+        ->name('dashboard');
 
-Route::get('consorcios', ConsorcioIndex::class)
-    ->middleware(['auth', 'verified'])
-    ->name('consorcios.index');
+    Route::get('consorcios', ConsorcioIndex::class)
+        ->name('consorcios.index');
 
-Route::view('profile', 'profile')
-    ->middleware(['auth'])
-    ->name('profile');
+    Route::get('unidades', UnidadIndex::class)
+        ->name('unidades.index');
+
+    Route::get('presupuestos', PresupuestoIndex::class)
+        ->name('presupuestos.index');
+
+    Route::get('presupuestos/nuevo', PresupuestoEditor::class)
+        ->name('presupuestos.create');
+
+    Route::get('presupuestos/{presupuesto}', PresupuestoEditor::class)
+        ->name('presupuestos.show');
+
+    Route::get('liquidaciones', LiquidacionIndex::class)
+        ->name('liquidaciones.index');
+
+    Route::view('profile', 'profile')
+        ->name('profile');
+});
 
 Route::post('logout', function () {
     auth()->logout();
@@ -23,6 +41,6 @@ Route::post('logout', function () {
     request()->session()->regenerateToken();
 
     return redirect('/');
-})->middleware('auth')->name('logout');
+})->middleware(['auth'])->name('logout');
 
 require __DIR__.'/auth.php';

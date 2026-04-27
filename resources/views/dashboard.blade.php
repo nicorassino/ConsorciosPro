@@ -47,29 +47,31 @@
                         <p class="mt-4 text-sm text-gray-500">Gestionar consorcios</p>
                     </a>
 
-                    <div class="glass-card rounded-xl p-6 shadow-sm border-l-4 border-blue-400 opacity-75">
+                    <a href="{{ route('unidades.index') }}" wire:navigate class="glass-card rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow group relative overflow-hidden border-l-4 border-blue-400 block">
                         <div class="flex justify-between items-start">
                             <div>
                                 <p class="text-sm font-medium text-gray-500 mb-1">Unidades</p>
-                                <h4 class="text-xl font-bold text-gray-600">Próximamente</h4>
+                                <h4 class="text-3xl font-bold text-gray-800">ABM</h4>
                             </div>
-                            <div class="h-12 w-12 rounded-lg bg-blue-50 text-blue-400 flex items-center justify-center">
+                            <div class="h-12 w-12 rounded-lg bg-blue-50 text-blue-500 flex items-center justify-center group-hover:bg-blue-500 group-hover:text-white transition-colors">
                                 <i class="fas fa-door-open text-xl"></i>
                             </div>
                         </div>
-                    </div>
+                        <p class="mt-4 text-sm text-gray-500">Gestionar unidades funcionales</p>
+                    </a>
 
-                    <div class="glass-card rounded-xl p-6 shadow-sm border-l-4 border-purple-400 opacity-75">
+                    <a href="{{ route('presupuestos.index') }}" wire:navigate class="glass-card rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow group relative overflow-hidden border-l-4 border-purple-400 block">
                         <div class="flex justify-between items-start">
                             <div>
                                 <p class="text-sm font-medium text-gray-500 mb-1">Presupuestos</p>
-                                <h4 class="text-xl font-bold text-gray-600">Próximamente</h4>
+                                <h4 class="text-3xl font-bold text-gray-800">ABM</h4>
                             </div>
-                            <div class="h-12 w-12 rounded-lg bg-purple-50 text-purple-400 flex items-center justify-center">
+                            <div class="h-12 w-12 rounded-lg bg-purple-50 text-purple-500 flex items-center justify-center group-hover:bg-purple-500 group-hover:text-white transition-colors">
                                 <i class="fas fa-calculator text-xl"></i>
                             </div>
                         </div>
-                    </div>
+                        <p class="mt-4 text-sm text-gray-500">Crear y administrar presupuestos</p>
+                    </a>
 
                     <div class="glass-card rounded-xl p-6 shadow-sm border-l-4 border-emerald-400 opacity-75">
                         <div class="flex justify-between items-start">

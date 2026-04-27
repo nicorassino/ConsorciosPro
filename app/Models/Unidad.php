@@ -2,8 +2,12 @@
 
 namespace App\Models;
 
+use App\Enums\CondicionIvaUnidad;
+use App\Enums\EstadoOcupacionUnidad;
+use App\Enums\ReciboNombreUnidad;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Unidad extends Model
@@ -35,6 +39,9 @@ class Unidad extends Model
     {
         return [
             'coeficiente' => 'decimal:6',
+            'estado_ocupacion' => EstadoOcupacionUnidad::class,
+            'recibos_a_nombre_de' => ReciboNombreUnidad::class,
+            'condicion_iva' => CondicionIvaUnidad::class,
             'tiene_cochera' => 'boolean',
             'activo' => 'boolean',
         ];
@@ -43,5 +50,20 @@ class Unidad extends Model
     public function consorcio(): BelongsTo
     {
         return $this->belongsTo(Consorcio::class);
+    }
+
+    public function propietario(): HasOne
+    {
+        return $this->hasOne(Propietario::class);
+    }
+
+    public function inquilino(): HasOne
+    {
+        return $this->hasOne(Inquilino::class);
+    }
+
+    public function inmobiliaria(): HasOne
+    {
+        return $this->hasOne(Inmobiliaria::class);
     }
 }
