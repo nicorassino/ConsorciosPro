@@ -71,7 +71,7 @@ Registro de facturas, pagos y vinculación con presupuestos.
 - Diseño profesional y moderno, NO genérico/bootstrap
 
 ## Reglas Críticas
-1. **NUNCA** usar los prototipos HTML como base de código del sistema final
+1. No usar los prototipos HTML como base de código del sistema final. Si tomar como referencia el prototipo 2.0 que ha sido aprobado por el cliente.
 2. Las liquidaciones almacenan **snapshots** de datos (no referencias mutables)
 3. Los coeficientes se reprrorratean al excluir unidades de un concepto
 4. Los campos de contacto deben ser amplios (emails de hasta 500 chars, teléfonos de hasta 200 chars)
