@@ -1,11 +1,18 @@
 # ConsorciosPro — Arquitectura del Sistema
 
-**Versión:** 1.0
-**Fecha:** 2026-03-23
+**Versión:** 1.1  
+**Fecha:** 2026-04-28  
+**Notas de cambio:** Visión producto; módulos transversales (SIRO, PDF, portal, informes).
 
 ---
 
-## 1. Stack Tecnológico
+## 1. Visión del producto
+
+Sistema **mono-empresa** (single-tenant) para Oliva Administraciones, con diseño que permita **escalar** a otros clientes en el futuro (separación de datos de tenant, sin constantes del cliente en el núcleo). La especificación funcional vive en `docs/01-requisitos-del-sistema.md`.
+
+---
+
+## 2. Stack Tecnológico
 
 | Capa | Tecnología | Versión | Justificación |
 |---|---|---|---|
@@ -30,7 +37,7 @@ Se podría usar **Laravel como API REST + Vue 3 (Inertia.js)**. Inertia permite 
 
 ---
 
-## 2. Arquitectura de Alto Nivel
+## 3. Arquitectura de Alto Nivel
 
 ```
 ┌──────────────────────────────────────────────────┐
@@ -54,9 +61,12 @@ Se podría usar **Laravel como API REST + Vue 3 (Inertia.js)**. Inertia permite 
 │  │  │  │Consorcio│ │Unidades  │ │Budget │  │   │   │
 │  │  │  │Manager  │ │Manager   │ │Manager│  │   │   │
 │  │  │  └─────────┘ └──────────┘ └───────┘  │   │   │
+│  │  │  ┌──────────┐ ┌──────────┐ ┌────────┐ │   │   │
+│  │  │  │Settlement│ │ Expense  │ │Portal  │ │   │   │
+│  │  │  │ Engine   │ │ /Gastos  │ │Auth.   │ │   │   │
+│  │  │  └──────────┘ └──────────┘ └────────┘ │   │   │
 │  │  │  ┌──────────┐ ┌──────────┐           │   │   │
-│  │  │  │Settlement│ │ Expense  │           │   │   │
-│  │  │  │ Engine   │ │ Tracker  │           │   │   │
+│  │  │  │Informes  │ │PDF/Email │           │   │   │
 │  │  │  └──────────┘ └──────────┘           │   │   │
 │  │  └──────────────────────────────────────┘   │   │
 │  │        │                                    │   │
@@ -65,7 +75,9 @@ Se podría usar **Laravel como API REST + Vue 3 (Inertia.js)**. Inertia permite 
 │  │  │  ┌───────────────┐ ┌──────────────┐  │   │   │
 │  │  │  │ BudgetService │ │ Settlement   │  │   │   │
 │  │  │  │               │ │ Calculator   │  │   │   │
-│  │  │  └───────────────┘ └──────────────┘  │   │   │
+│  │  │  ├───────────────┴──────────────┤  │   │   │
+│  │  │  │ RecargoDiario / SiroCupón / PDF │  │   │   │
+│  │  │  └───────────────────────────────┘  │   │   │
 │  │  └──────────────────────────────────────┘   │   │
 │  │        │                                    │   │
 │  │  ┌─────▼────────────────────────────────┐   │   │
@@ -81,7 +93,22 @@ Se podría usar **Laravel como API REST + Vue 3 (Inertia.js)**. Inertia permite 
 
 ---
 
-## 3. Estructura del Proyecto Laravel
+## 4. Módulos transversales
+
+Capacidades que atraviesan varios dominios (detalle en `docs/01-requisitos-del-sistema.md`):
+
+| Área | Función |
+|------|---------|
+| **SIRO / cobranzas** | Datos para cupones (códigos de barras/QR); cupón **por cada mes adeudado**; montos según motor de **recargo diario** |
+| **PDF y correo** | Paquete cupón + informe económico/balance + cuerpo administrativo (notas del consorcio); flujo de **aprobación** previo al envío cuando aplique |
+| **Portal de autogestión** | Propietarios/inquilinos: cupones, historial, reglamento, emergencias, contacto encargado |
+| **Informes** | Balance, flujo de caja, discriminación de ingresos, deudores, deuda proveedores, estadísticas, conciliación |
+
+Servicios orientativos en `app/Services/`: por ejemplo `LiquidacionCalculator`, `PresupuestoService`, `RecargoDiarioCalculator`, generador SIRO/PDF; **jobs/colas** Laravel si el volumen de PDF/envíos lo justifica.
+
+---
+
+## 5. Estructura del Proyecto Laravel
 
 ```
 ConsorciosPro/
@@ -109,6 +136,10 @@ ConsorciosPro/
 │   │   ├── Gastos/
 │   │   │   ├── GastoList.php
 │   │   │   └── GastoForm.php
+│   │   ├── Portal/
+│   │   │   └── …                         # Autogestión (rutas/guards específicos)
+│   │   ├── Informes/
+│   │   │   └── …
 │   │   └── Dashboard.php
 │   ├── Models/
 │   │   ├── Consorcio.php
@@ -127,7 +158,9 @@ ConsorciosPro/
 │   └── Services/
 │       ├── PresupuestoService.php      # Lógica de clonación, ajustes
 │       ├── LiquidacionCalculator.php   # Motor de cálculo de liquidación
-│       └── GastoService.php
+│       ├── GastoService.php
+│       ├── RecargoDiarioCalculator.php # Importes cupón según SRS §2.5
+│       └── InformeEconomicoBuilder.php # Balance / exportaciones (evolución)
 ├── database/
 │   ├── migrations/
 │   └── seeders/
@@ -153,22 +186,24 @@ ConsorciosPro/
 │   └── img/
 │       ├── logo_CP.png
 │       └── logo_cliente.png
-└── .cursorrules                        # Reglas de contexto para Cursor AI
+├── AGENTS.md                           # Índice de contexto para agentes IA
+├── .cursorrules                        # Reglas Cursor (raíz)
+└── .cursor/rules/*.mdc                 # Reglas modulares versionadas
 ```
 
 ---
 
-## 4. Diseño de la Interfaz — Principios
+## 6. Diseño de la Interfaz — Principios
 
-### 4.1 Sistema de Navegación
+### 6.1 Sistema de Navegación
 
 **Sidebar colapsable** (no navbar superior como en los prototipos):
 - Logo CP + nombre "ConsorciosPro" en la parte superior
-- Ítems: Dashboard, Consorcios, Unidades, Presupuestos, Liquidaciones, Gastos
+- Ítems (administración): Dashboard, Consorcios, Unidades, Presupuestos, Liquidaciones, Gastos/Comprobantes, Informes (según implementación); portal autogestión en rutas separadas
 - La sidebar colapsa a íconos en pantallas medianas y se oculta (hamburger) en mobile
 - Logo del cliente en el footer de la sidebar
 
-### 4.2 Layout General
+### 6.2 Layout General
 
 ```
 ┌────────┬──────────────────────────────────────────┐
@@ -185,7 +220,7 @@ ConsorciosPro/
 └────────┴──────────────────────────────────────────┘
 ```
 
-### 4.3 Paleta de Colores
+### 6.3 Paleta de Colores
 
 | Uso | Color | Hex |
 |---|---|---|
@@ -200,7 +235,7 @@ ConsorciosPro/
 | Text Primary | Gris oscuro | `#111827` |
 | Text Secondary | Gris medio | `#6B7280` |
 
-### 4.4 Componentes Clave
+### 6.4 Componentes Clave
 
 1. **Dashboard:** Grid de tarjetas con íconos, contadores, y accesos directos (inspirado en el prototipo que le gustó al cliente)
 2. **Tablas de datos:** Con búsqueda, filtros, paginación, selección múltiple
@@ -210,7 +245,7 @@ ConsorciosPro/
 
 ---
 
-## 5. Seguridad
+## 7. Seguridad
 
 | Aspecto | Implementación |
 |---|---|
@@ -223,7 +258,7 @@ ConsorciosPro/
 
 ---
 
-## 6. Deploy en Hostinger
+## 8. Deploy en Hostinger
 
 1. **Git push** → repositorio remoto
 2. **SSH a Hostinger** → `git pull`

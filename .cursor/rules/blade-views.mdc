@@ -1,0 +1,13 @@
+---
+description: Vistas Blade y UI ConsorciosPro
+globs: resources/views/**/*.blade.php
+alwaysApply: false
+---
+
+# Blade
+
+- Vistas Livewire bajo `resources/views/livewire/<modulo>/`.
+- Layout principal: `resources/views/layouts/app.blade.php`.
+- **Sidebar colapsable** como navegación principal (no navbar superior).
+- Tailwind utility-first; Alpine para micro-interacciones.
+- Paleta: primario `#1E3A5F`, éxito `#059669`, fondo `#F3F4F6`.

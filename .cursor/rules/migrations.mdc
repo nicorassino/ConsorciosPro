@@ -1,0 +1,14 @@
+---
+description: Migraciones y convenciones de base de datos ConsorciosPro
+globs: "**/database/migrations/**/*.php"
+alwaysApply: false
+---
+
+# Migraciones
+
+- Tablas en plural `snake_case`: `consorcios`, `concepto_presupuestos`.
+- Columnas `snake_case`. FKs con sufijo `_id`.
+- Montos `decimal(12,2)`; coeficientes `decimal(8,6)`.
+- Tablas de negocio principal: `SoftDeletes` donde aplique (SRS / modelo actual).
+- Enums PHP 8 para estados y tipos alineados al SRS (`docs/01-requisitos-del-sistema.md`).
+- Índices en `consorcio_id`, períodos y CUIT según `docs/03-modelo-de-datos.md`.

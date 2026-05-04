@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class LiquidacionDetalle extends Model
 {
@@ -36,5 +37,10 @@ class LiquidacionDetalle extends Model
     public function unidad(): BelongsTo
     {
         return $this->belongsTo(Unidad::class);
+    }
+
+    public function cobranzas(): HasMany
+    {
+        return $this->hasMany(Cobranza::class);
     }
 }

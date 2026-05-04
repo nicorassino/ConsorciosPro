@@ -30,5 +30,15 @@ class DatabaseSeeder extends Seeder
             'password' => Hash::make('2648'),
             'email_verified_at' => now(),
         ]);
+
+        $this->call([
+            ConsorcioSeeder::class,
+            UnidadSeeder::class,
+            PresupuestoSeeder::class,
+            GastoSeeder::class,
+            LiquidacionSeeder::class,
+            CobranzaSeeder::class,
+            MovimientoFondoSeeder::class,
+        ]);
     }
 }

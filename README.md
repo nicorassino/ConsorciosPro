@@ -1,58 +1,54 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# ConsorciosPro
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Sistema web de administración de consorcios para **Oliva Administraciones**: presupuestos, liquidación de expensas, gastos/facturas, integración SIRO y portal de autogestión.
 
-## About Laravel
+La especificación funcional (**SRS**) está en [`docs/01-requisitos-del-sistema.md`](docs/01-requisitos-del-sistema.md).
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Documentación
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+| Documento | Descripción |
+|-----------|-------------|
+| [docs/01-requisitos-del-sistema.md](docs/01-requisitos-del-sistema.md) | Requisitos (fuente de verdad) |
+| [docs/02-arquitectura-del-sistema.md](docs/02-arquitectura-del-sistema.md) | Stack y arquitectura |
+| [docs/03-modelo-de-datos.md](docs/03-modelo-de-datos.md) | Modelo de datos |
+| [docs/04-reglas-de-negocio.md](docs/04-reglas-de-negocio.md) | Reglas de negocio |
+| [docs/05-plan-de-fases.md](docs/05-plan-de-fases.md) | Plan por fases |
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Stack
 
-## Learning Laravel
+- PHP 8.2, Laravel 11  
+- Livewire 3, Alpine.js, TailwindCSS 4  
+- MySQL 8.0  
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## Requisitos locales
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+- PHP 8.2+ con extensiones habituales de Laravel  
+- Composer  
+- Node.js + npm (assets/Vite)  
+- MySQL 8  
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+## Puesta en marcha (desarrollo)
 
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+composer install
+cp .env.example .env
+php artisan key:generate
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+Configurar base de datos en `.env`, luego:
 
-## Contributing
+```bash
+php artisan migrate
+npm install && npm run dev
+php artisan serve
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## Contexto para agentes (Cursor)
 
-## Code of Conduct
+- [`AGENTS.md`](AGENTS.md) — índice  
+- [`.cursorrules`](.cursorrules) — reglas en raíz  
+- [`.cursor/rules/`](.cursor/rules/) — reglas modulares (`*.mdc`, versionadas en Git)
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## Licencia
 
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+El framework Laravel incluido en el proyecto es open source bajo la [licencia MIT](https://opensource.org/licenses/MIT). La aplicación ConsorciosPro y su documentación propia siguen la licencia definida por el propietario del repositorio.

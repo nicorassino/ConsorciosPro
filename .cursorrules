@@ -2,10 +2,13 @@
 
 Este archivo provee contexto al agente de IA (Cursor) para desarrollar el sistema ConsorciosPro.
 
+**Reglas modulares versionadas:** `.cursor/rules/*.mdc` (convenciones por área). Este archivo resume el proyecto y enlaza documentación.
+
 ## Proyecto
 - **Nombre:** ConsorciosPro
 - **Cliente:** Oliva Administraciones
 - **Tipo:** Sistema web de administración de consorcios (edificios)
+- **Contrato funcional:** `docs/01-requisitos-del-sistema.md` (**SRS v1.4** — fuente de verdad)
 - **Idioma del sistema:** Español (Argentina)
 - **Idioma del código:** Inglés para código, español para labels/textos de UI
 
@@ -43,22 +46,25 @@ Este archivo provee contexto al agente de IA (Cursor) para desarrollar el sistem
 ## Módulos del Sistema
 
 ### 1. Consorcios (ABM)
-CRUD de edificios/consorcios con datos bancarios, catastrales y de encargado.
+CRUD de edificios/consorcios con datos bancarios, catastrales, encargado, textos de medios de pago, `tiene_cocheras`, vencimientos/recargo nominales.
 
 ### 2. Unidades Funcionales (ABM)
-Departamentos/PH de cada consorcio. Incluye datos de propietario, inquilino e inmobiliaria. Campos de contacto deben ser amplios (requisito del cliente).
+Departamentos/PH: coeficientes, cocheras (si el consorcio las habilita), propietario, inquilino, inmobiliaria, contactos alternativos. Campos de contacto amplios (requisito del cliente).
 
 ### 3. Presupuestos Mensuales
-Un presupuesto por consorcio/mes con conceptos de gastos. Los conceptos pueden ser ordinarios (inquilinos) o extraordinarios (propietarios). Sistema de cuotas y estimados con ajustes automáticos.
+Un presupuesto por consorcio/mes; **valores reales del mes** para días de vencimiento y % recargo (override de los nominales del consorcio). Conceptos ordinarios/extraordinarios, cuotas, `aplica_cocheras`, estimados con `monto_factura_real` para confirmación.
 
 ### 4. Liquidación de Expensas
-Motor de cálculo que distribuye conceptos a unidades por 3 métodos:
-- **Coeficiente:** Proporcional al % de copropiedad (con reprorrategeo si se excluyen unidades)
-- **Partes iguales:** Dividido equitativamente
-- **Manual:** % personalizado por unidad
+Motor por coeficiente (conjuntos y snapshot), partes iguales, manual; exclusiones y reprorrateo. **Filtro rápido cocheras:** excluir UF sin cochera, sin liquidación por coeficiente en ese flujo, partes iguales por defecto, manual permitido.
 
-### 5. Gastos y Facturas (parcialmente definido)
-Registro de facturas, pagos y vinculación con presupuestos.
+### 5. Gastos / Facturas
+Pantalla de carga independiente del armado del presupuesto; una factura puede repartirse en varios conceptos; ajustes al mes siguiente según diferencias.
+
+### 6. SIRO / Cupones / Portal
+Integración SIRO; cupones sin desglose de conceptos en el cupón; **sin CBU** en impreso; deuda **no agrupada** (un cupón por mes adeudado); recargo **diario** (mes 30 días) y dos montos según plazos. PDF por mail: cupón + balance + notas administrativas (campo nota del consorcio).
+
+### 7. Informes
+Balance/detalle de gastos, flujo de caja, discriminación de ingresos, deudores, deuda proveedores, estadísticas, conciliación (según SRS §2.7).
 
 ## Diseño UI
 - Sidebar colapsable con navegación
@@ -80,10 +86,12 @@ Registro de facturas, pagos y vinculación con presupuestos.
 7. **TODOS los conceptos del presupuesto son estimados por defecto** hasta que se les asigna una factura real. La presencia de `monto_factura_real` (no NULL) indica que el concepto está confirmado. NO existe un campo `es_estimado` booleano.
 8. El sistema usa **sidebar colapsable** como navegación principal (NO navbar superior)
 9. Frontend confirmado: **Livewire 3 + Alpine.js** (NO Vue/React separado)
+10. **Cupón / cobranzas:** ver reglas diarias de recargo, exclusión de CBU en cupón, cupones separados por mes de deuda, y PDF multi-parte — detalle en `docs/04-reglas-de-negocio.md` alineado al SRS v1.4.
 
 ## Documentación
-- `docs/01-requisitos-del-sistema.md` — Especificación de requisitos completa
-- `docs/02-arquitectura-del-sistema.md` — Arquitectura y estructura del proyecto
+- `docs/01-requisitos-del-sistema.md` — SRS (especificación completa)
+- `docs/02-arquitectura-del-sistema.md` — Arquitectura y módulos transversales
 - `docs/03-modelo-de-datos.md` — ERD y diseño de base de datos
 - `docs/04-reglas-de-negocio.md` — Flujos y fórmulas de cálculo
 - `docs/05-plan-de-fases.md` — Plan de implementación por fases
+- `AGENTS.md` — Índice de contexto para agentes

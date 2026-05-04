@@ -1,0 +1,26 @@
+---
+description: ConsorciosPro — stack, dominio y reglas críticas (SRS v1.4)
+alwaysApply: true
+---
+
+# ConsorciosPro — núcleo
+
+- **Cliente:** Oliva Administraciones. **UI:** español (AR). **Código:** inglés; labels en español.
+- **Stack:** Laravel 11, PHP 8.2, Livewire 3, Alpine.js, TailwindCSS 4, MySQL 8.0.
+- **Contrato funcional:** `docs/01-requisitos-del-sistema.md` (v1.4). Otros docs deben alinearse al SRS.
+
+## Dominio
+
+- Single-tenant hoy; diseñar sin hardcodear datos del cliente para futura escalabilidad.
+- Presupuesto: todos los conceptos son **estimados** hasta asignar factura real (`monto_factura_real` NOT NULL). No usar flag `es_estimado`.
+- Liquidaciones: **snapshots** inmutables; coeficientes reprorrateados si hay exclusiones.
+- Vencimientos: valores **nominales** en consorcio; valores **reales del mes** en presupuesto (ver SRS §2.3).
+- Recargos en cupón: cálculo **diario**, mes de 30 días; dos montos según plazos (1er / 2do vto). Ver SRS §2.5.
+- Cupón: sin desglose de conceptos; **no mostrar CBU**; un cupón por cada mes adeudado (deuda no agrupada).
+- PDF/envío: cupón + balance editable + cuerpo desde nota del consorcio (SRS §2.5).
+- Liquidación: **filtro cocheras** (excluir UF sin cochera; bloquear coeficiente; partes iguales por defecto; manual permitido).
+
+## Referencias
+
+- Reglas de negocio: `docs/04-reglas-de-negocio.md`
+- Modelo de datos: `docs/03-modelo-de-datos.md`

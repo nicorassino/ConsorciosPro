@@ -35,4 +35,18 @@ return [
         ],
     ],
 
+    'siro' => [
+        'base_url' => env('SIRO_API_BASE_URL'),
+        'api_key' => env('SIRO_API_KEY'),
+        /*
+         * Opción A: URL completa con placeholders, ej.:
+         * https://pagos.ejemplo.com/pagar?cp={codigo_pago_electronico}&imp={importe}&per={periodo}
+         */
+        'payment_url_template' => env('SIRO_PAYMENT_URL_TEMPLATE'),
+        /*
+         * Opción B: base URL; se agrega query string estándar (codigo, importe, periodo, etc.).
+         */
+        'payment_base_url' => env('SIRO_PAYMENT_BASE_URL'),
+    ],
+
 ];

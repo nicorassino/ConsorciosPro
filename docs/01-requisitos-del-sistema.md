@@ -1,9 +1,9 @@
 # ConsorciosPro — Documento de Requisitos del Sistema (SRS)
 
 **Cliente:** Oliva Administraciones
-**Versión:** 1.4
-**Fecha:** 2026-04-24
-**Última actualización:** 2026-04-24 — Ajustes por devolución cliente (recargos diarios, cocheras, facturas reales, informes y envío de cupones)
+**Versión:** 1.5
+**Fecha:** 2026-05-04
+**Última actualización:** 2026-05-04 — Ajustes en módulo de gastos/facturas (periodo normalizado como fecha, nomenclatura de archivos y ciclo de vida online/local)
 **Fuente:** 3 reuniones con el cliente + análisis de prototipos
 
 ---
@@ -204,6 +204,9 @@ La liquidación toma un presupuesto finalizado y calcula cuánto debe pagar cada
 1. **Pantalla Independiente:** Existe una pantalla separada para la carga de comprobantes por mes y por concepto, independiente de la vista de armado del presupuesto.
 2. **Vinculación y Ajuste Automático:** Al cargar una factura real, el sistema debe detectar automáticamente la diferencia con el monto estimado y generar el ajuste para el presupuesto del mes siguiente, indicando al usuario el ajuste creado.
 3. **Desglose de Conceptos:** Una misma factura (ej. abono de ascensores) debe poder distribuirse en múltiples conceptos (ej. abono mensual y reparaciones extra).
+4. **Período normalizado:** El campo `periodo` de `gastos` se persiste como `date` con formato `YYYY-MM-01` (primer día del mes). La UI trabaja en `YYYY-MM`.
+5. **Ciclo de vida de archivos:** `gastos` incorpora `factura_nombre_sistema`, `archivo_disponible_online` y `fecha_archivado_local` para gestionar descarga, archivado local y trazabilidad histórica.
+6. **Nomenclatura automática:** Al subir la factura, el nombre del sistema debe seguir el patrón `[concepto-slug]_[AAAA-MM]_[consorcio-slug].[ext]` (si se imputa a más de un concepto, usar `varios`).
 
 ### 2.7 Informes y Comunicación
 
@@ -237,9 +240,4 @@ La liquidación toma un presupuesto finalizado y calcula cuánto debe pagar cada
 
 ---
 
-## 4. Preguntas Pendientes (Fase 2)
 
-1. **Gastos/Facturas:** ¿Qué información exacta necesitan registrar? ¿Se suben PDFs de facturas a la plataforma?
-2. **Proveedores:** ¿Se necesita un ABM de proveedores? ¿Qué datos se guardan?
-3. **Usuarios y Roles:** ¿Quién usa el sistema administrativamente? ¿Hay distintos niveles de acceso (ej: solo lectura)?
-4. **Notificaciones:** ¿Se envían emails automáticos con avisos de expensas, o el usuario solo entra al portal de autogestión?

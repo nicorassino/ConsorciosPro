@@ -7,6 +7,7 @@ use App\Enums\EstadoOcupacionUnidad;
 use App\Enums\ReciboNombreUnidad;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -65,5 +66,15 @@ class Unidad extends Model
     public function inmobiliaria(): HasOne
     {
         return $this->hasOne(Inmobiliaria::class);
+    }
+
+    public function portalUsers(): HasMany
+    {
+        return $this->hasMany(PortalUser::class);
+    }
+
+    public function cobranzas(): HasMany
+    {
+        return $this->hasMany(Cobranza::class);
     }
 }

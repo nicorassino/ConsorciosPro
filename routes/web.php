@@ -1,6 +1,11 @@
 <?php
 
+use App\Http\Controllers\PortalAuthController;
+use App\Http\Controllers\PortalDashboardController;
+use App\Http\Controllers\PortalPasswordController;
 use App\Livewire\Consorcios\ConsorcioIndex;
+use App\Livewire\Gastos\GastoEditor;
+use App\Livewire\Gastos\GastoIndex;
 use App\Livewire\Liquidaciones\LiquidacionIndex;
 use App\Livewire\Presupuestos\PresupuestoEditor;
 use App\Livewire\Presupuestos\PresupuestoIndex;
@@ -31,6 +36,15 @@ Route::middleware(['auth', 'verified', 'admin'])->group(function () {
     Route::get('liquidaciones', LiquidacionIndex::class)
         ->name('liquidaciones.index');
 
+    Route::get('gastos', GastoIndex::class)
+        ->name('gastos.index');
+
+    Route::get('gastos/nuevo', GastoEditor::class)
+        ->name('gastos.create');
+
+    Route::get('gastos/{gasto}', GastoEditor::class)
+        ->name('gastos.show');
+
     Route::view('profile', 'profile')
         ->name('profile');
 });
@@ -42,5 +56,22 @@ Route::post('logout', function () {
 
     return redirect('/');
 })->middleware(['auth'])->name('logout');
+
+Route::prefix('portal')->name('portal.')->group(function () {
+    Route::middleware('guest:portal')->group(function () {
+        Route::get('login', [PortalAuthController::class, 'create'])->name('login');
+        Route::post('login', [PortalAuthController::class, 'store'])->name('login.store');
+    });
+
+    Route::middleware(['auth:portal'])->group(function () {
+        Route::get('password/change', [PortalPasswordController::class, 'edit'])->name('password.edit');
+        Route::put('password/change', [PortalPasswordController::class, 'update'])->name('password.update');
+        Route::post('logout', [PortalAuthController::class, 'destroy'])->name('logout');
+    });
+
+    Route::middleware(['auth:portal', 'force-password-change'])->group(function () {
+        Route::get('dashboard', PortalDashboardController::class)->name('dashboard');
+    });
+});
 
 require __DIR__.'/auth.php';

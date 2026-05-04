@@ -5,6 +5,7 @@ namespace App\Livewire\Presupuestos;
 use App\Enums\EstadoPresupuesto;
 use App\Enums\RubroConceptoPresupuesto;
 use App\Enums\TipoConceptoPresupuesto;
+use App\Models\ConceptoPresupuesto;
 use App\Models\Consorcio;
 use App\Models\Presupuesto;
 use Carbon\Carbon;
@@ -15,6 +16,8 @@ use Livewire\Component;
 
 class PresupuestoEditor extends Component
 {
+    private const AJUSTE_DESCRIPCION_AUTO = 'Generado automáticamente por diferencia con factura real del período anterior.';
+
     public ?Presupuesto $presupuesto = null;
     public bool $isCreateMode = false;
     public bool $showConceptModal = false;
@@ -225,55 +228,96 @@ class PresupuestoEditor extends Component
 
     private function cloneFromPreviousMonth(Presupuesto $newPresupuesto): void
     {
+        $orden = 1;
         $previous = Presupuesto::query()
             ->where('consorcio_id', $newPresupuesto->consorcio_id)
             ->whereDate('periodo', Carbon::parse($newPresupuesto->periodo)->subMonth()->startOfMonth()->toDateString())
             ->with('conceptos')
             ->first();
 
-        if (! $previous) {
-            return;
+        if ($previous) {
+            $newPresupuesto->update(['presupuesto_anterior_id' => $previous->id]);
+
+            foreach ($previous->conceptos as $conceptoAnterior) {
+                $siguienteCuota = $conceptoAnterior->cuotas_total > 1
+                    ? $conceptoAnterior->cuota_actual + 1
+                    : $conceptoAnterior->cuota_actual;
+
+                if ($conceptoAnterior->cuotas_total > 1 && $siguienteCuota > $conceptoAnterior->cuotas_total) {
+                    continue;
+                }
+
+                $newPresupuesto->conceptos()->create([
+                    'nombre' => $conceptoAnterior->nombre,
+                    'rubro' => $conceptoAnterior->rubro->value,
+                    'descripcion' => $conceptoAnterior->descripcion,
+                    'monto_total' => $conceptoAnterior->monto_total,
+                    'cuotas_total' => $conceptoAnterior->cuotas_total,
+                    'cuota_actual' => $siguienteCuota,
+                    'tipo' => $conceptoAnterior->tipo->value,
+                    'aplica_cocheras' => $conceptoAnterior->aplica_cocheras,
+                    'orden' => $orden++,
+                ]);
+            }
         }
 
-        $newPresupuesto->update(['presupuesto_anterior_id' => $previous->id]);
+        $this->appendPendingAutoAjustes($newPresupuesto, $orden);
+    }
 
-        $orden = 1;
-        foreach ($previous->conceptos as $conceptoAnterior) {
-            $siguienteCuota = $conceptoAnterior->cuotas_total > 1
-                ? $conceptoAnterior->cuota_actual + 1
-                : $conceptoAnterior->cuota_actual;
+    private function appendPendingAutoAjustes(Presupuesto $newPresupuesto, int $startOrder): void
+    {
+        $targetPeriodo = Carbon::parse($newPresupuesto->periodo)->startOfMonth()->toDateString();
+        $orden = $startOrder;
 
-            if ($conceptoAnterior->cuotas_total > 1 && $siguienteCuota > $conceptoAnterior->cuotas_total) {
+        $origenes = ConceptoPresupuesto::query()
+            ->join('presupuestos', 'presupuestos.id', '=', 'concepto_presupuestos.presupuesto_id')
+            ->where('presupuestos.consorcio_id', $newPresupuesto->consorcio_id)
+            ->whereDate('presupuestos.periodo', '<', $targetPeriodo)
+            ->where(function ($query): void {
+                $query->whereNull('concepto_presupuestos.descripcion')
+                    ->orWhere('concepto_presupuestos.descripcion', '!=', self::AJUSTE_DESCRIPCION_AUTO);
+            })
+            ->get(['concepto_presupuestos.*', 'presupuestos.periodo as presupuesto_periodo']);
+
+        foreach ($origenes as $conceptoOrigen) {
+            $diferencia = round((float) ($conceptoOrigen->monto_factura_real ?? 0) - (float) $conceptoOrigen->monto_total, 2);
+            if ($diferencia === 0.0) {
+                continue;
+            }
+
+            $ajusteNombre = 'Ajuste '.$conceptoOrigen->nombre;
+            $yaExisteEnActual = ConceptoPresupuesto::query()
+                ->where('presupuesto_id', $newPresupuesto->id)
+                ->where('nombre', $ajusteNombre)
+                ->where('descripcion', self::AJUSTE_DESCRIPCION_AUTO)
+                ->exists();
+            if ($yaExisteEnActual) {
+                continue;
+            }
+
+            $yaFueMaterializado = ConceptoPresupuesto::query()
+                ->join('presupuestos', 'presupuestos.id', '=', 'concepto_presupuestos.presupuesto_id')
+                ->where('presupuestos.consorcio_id', $newPresupuesto->consorcio_id)
+                ->whereDate('presupuestos.periodo', '>', Carbon::parse($conceptoOrigen->presupuesto_periodo)->startOfMonth()->toDateString())
+                ->whereDate('presupuestos.periodo', '<', $targetPeriodo)
+                ->where('concepto_presupuestos.nombre', $ajusteNombre)
+                ->where('concepto_presupuestos.descripcion', self::AJUSTE_DESCRIPCION_AUTO)
+                ->exists();
+            if ($yaFueMaterializado) {
                 continue;
             }
 
             $newPresupuesto->conceptos()->create([
-                'nombre' => $conceptoAnterior->nombre,
-                'rubro' => $conceptoAnterior->rubro->value,
-                'descripcion' => $conceptoAnterior->descripcion,
-                'monto_total' => $conceptoAnterior->monto_total,
-                'cuotas_total' => $conceptoAnterior->cuotas_total,
-                'cuota_actual' => $siguienteCuota,
-                'tipo' => $conceptoAnterior->tipo->value,
-                'aplica_cocheras' => $conceptoAnterior->aplica_cocheras,
+                'nombre' => $ajusteNombre,
+                'rubro' => $conceptoOrigen->rubro->value,
+                'descripcion' => self::AJUSTE_DESCRIPCION_AUTO,
+                'monto_total' => $diferencia,
+                'cuotas_total' => 1,
+                'cuota_actual' => 1,
+                'tipo' => $conceptoOrigen->tipo->value,
+                'aplica_cocheras' => false,
                 'orden' => $orden++,
             ]);
-
-            if ($conceptoAnterior->monto_factura_real !== null) {
-                $diferencia = (float) $conceptoAnterior->monto_factura_real - (float) $conceptoAnterior->monto_total;
-                if (round($diferencia, 2) !== 0.0) {
-                    $newPresupuesto->conceptos()->create([
-                        'nombre' => 'Ajuste '.$conceptoAnterior->nombre,
-                        'rubro' => $conceptoAnterior->rubro->value,
-                        'descripcion' => 'Generado automáticamente por diferencia con factura real del período anterior.',
-                        'monto_total' => $diferencia,
-                        'cuotas_total' => 1,
-                        'cuota_actual' => 1,
-                        'tipo' => $conceptoAnterior->tipo->value,
-                        'orden' => $orden++,
-                    ]);
-                }
-            }
         }
     }
 

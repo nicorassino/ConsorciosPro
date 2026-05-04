@@ -1,0 +1,11 @@
+---
+description: Componentes Livewire ConsorciosPro
+globs: app/Livewire/**/*.php
+alwaysApply: false
+---
+
+# Livewire
+
+- Ubicación: `app/Livewire/<Modulo>/`; nombres: `ConsorcioList`, `PresupuestoManager`, etc.
+- Mantener lógica pesada en `app/Services/` cuando corresponda.
+- Estados de carga con skeletons; tablas con búsqueda, filtros y paginación.

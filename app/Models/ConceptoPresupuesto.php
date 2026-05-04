@@ -6,6 +6,7 @@ use App\Enums\RubroConceptoPresupuesto;
 use App\Enums\TipoConceptoPresupuesto;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class ConceptoPresupuesto extends Model
 {
@@ -42,5 +43,12 @@ class ConceptoPresupuesto extends Model
     public function presupuesto(): BelongsTo
     {
         return $this->belongsTo(Presupuesto::class);
+    }
+
+    public function gastos(): BelongsToMany
+    {
+        return $this->belongsToMany(Gasto::class, 'gasto_concepto_presupuesto')
+            ->withPivot('importe_asignado')
+            ->withTimestamps();
     }
 }

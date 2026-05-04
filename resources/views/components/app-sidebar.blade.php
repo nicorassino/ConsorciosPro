@@ -81,11 +81,15 @@
             </a>
 
             <a
-                href="#"
-                class="flex items-center gap-3 px-3 py-2.5 text-gray-300 hover:bg-primary-800 hover:text-white rounded-lg group transition-colors opacity-70 pointer-events-none cursor-not-allowed"
-                title="Próximamente"
+                href="{{ route('gastos.index') }}"
+                wire:navigate
+                @class([
+                    'flex items-center gap-3 px-3 py-2.5 rounded-lg group transition-colors',
+                    'bg-accent-600/20 text-accent-500 border-r-4 border-accent-500' => $active === 'gastos',
+                    'text-gray-300 hover:bg-primary-800 hover:text-white' => $active !== 'gastos',
+                ])
             >
-                <i class="fas fa-receipt text-lg group-hover:text-orange-400 transition-colors"></i>
+                <i class="fas fa-receipt text-lg @if($active !== 'gastos') group-hover:text-orange-400 @endif transition-colors"></i>
                 <span class="font-medium">Gastos y Facturas</span>
             </a>
         </nav>

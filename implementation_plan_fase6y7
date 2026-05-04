@@ -1,0 +1,71 @@
+# Plan de Implementación: Fase 6 y Fase 7
+
+Este documento detalla el plan definitivo de desarrollo conjunto para las Fases 6 y 7, incorporando el modelo de datos financiero, la integración completa de la API de SIRO, el flujo de acceso al portal y seeders integrales para pruebas de extremo a extremo (E2E).
+
+---
+
+## Fase 6: SIRO API, Portal de Autogestión, PDF y Seeders Integrales
+
+### 1. Modelo de Datos Financiero (Aprobado)
+Se adelantará la creación de las tablas financieras para poder simular el circuito completo y tener la base lista para los reportes.
+
+- **Migraciones:**
+  - `cuentas_bancarias`: `consorcio_id`, `nombre`, `cbu`, `saldo_actual`.
+  - `movimientos_fondos`: `cuenta_id`, `fecha`, `tipo` (ingreso/egreso), `monto`, `descripcion`, `referencia_id` (polimórfico a `Cobranza` o `Gasto`), `saldo_resultante`.
+  - `cobranzas`: `consorcio_id`, `unidad_id`, `fecha_pago`, `monto_capital`, `monto_interes`, `total_pagado`, `medio_pago` (ej. SIRO), `comprobante_path`, `liquidacion_detalle_id`.
+- **Modelos:** `CuentaBancaria.php`, `MovimientoFondo.php`, `Cobranza.php`.
+
+### 2. Seeders Integrales para Testing (E2E)
+Se creará un conjunto robusto de Seeders para inyectar datos en todas las etapas del sistema, permitiendo pruebas profundas de la API de SIRO y de los reportes.
+- `ConsorcioSeeder`, `UnidadSeeder` (incluyendo Propietarios, Inquilinos e Inmobiliarias).
+- `PresupuestoSeeder` y `GastoSeeder`.
+- `LiquidacionSeeder`.
+- `CobranzaSeeder` y `MovimientoFondoSeeder` (simulando acreditaciones de SIRO y pagos de gastos).
+
+### 3. Integración Completa SIRO (Vía API)
+Basado en el documento `SIRO Developers - API SIRO...`, se desarrollará la integración completa de Webservices.
+- **`SiroApiService`:** Módulo encargado de la autenticación con la API, el reporte de deuda (liquidaciones nuevas) y la consulta/recepción de cobranzas acreditadas.
+- **Recargo Diario:** Motor de cálculo (según SRS §2.5) para reflejar los intereses dinámicos en la deuda reportada.
+- **Regla Estricta:** La deuda no se agrupa. Se informará a SIRO un concepto/cupón por cada mes adeudado.
+
+### 4. Portal de Autogestión y Autenticación
+- **Acceso Multiusuario:** Inquilinos, propietarios e inmobiliarias ingresarán utilizando el **Email** registrado en su respectivo perfil de la Unidad Funcional.
+- **Contraseña Inicial:** Será el **Número de Cuenta de Rentas** de la unidad correspondiente.
+- **Forzar Cambio de Clave:** Se implementará un middleware `ForcePasswordChange` que detectará el primer inicio de sesión y obligará al usuario a establecer una contraseña personal. Cada usuario (inquilino, propietario, etc.) tendrá su propia contraseña.
+- **Dashboard del Consorcista:** Visualización de cupones de pago (SIRO), historial de pagos acreditados, visualización del reglamento y contactos de emergencia.
+
+### 5. PDFs y Notificaciones
+- Composición de PDF: Cupón de SIRO + Informe Económico + Notas del Consorcio.
+- Sistema de colas (Jobs) para envío de correos electrónicos con comprobantes y notificaciones a los consorcistas.
+
+---
+
+## Fase 7: Informes y Conciliación
+
+Con el ecosistema poblado de datos gracias a los Seeders y la API de SIRO simulada, se desarrollarán las herramientas de auditoría y reportes.
+
+### 1. Pantalla de Conciliación y Saldos
+- **Núcleo Financiero:** Será el punto de partida donde se mostrará el **Saldo Inicial** del consorcio.
+- **Variaciones:** Desglose de ingresos (Cobranzas traídas de SIRO) y egresos (Gastos en estado `pagado`).
+- **Ajustes:** Posibilidad de cargar movimientos bancarios manuales (ej. comisiones bancarias, impuestos) para que el saldo del sistema cuadre exactamente con el extracto bancario.
+- **Contraste:** Grilla que compara el Saldo Bancario Disponible vs Obligaciones (Gastos pendientes), útil para autorizar pagos.
+
+### 2. Informes Económicos y Financieros
+- **Informe Económico Mensual (Balance):** Tabla desglosada por rubro y concepto con todos los egresos devengados y efectivamente percibidos del mes.
+- **Flujo de Caja:** Resumen de ingresos y egresos monetarios, listos para descargar o imprimir.
+- **Discriminación de Ingresos:** Desglose preciso del capital recaudado (expensas) vs los recargos e intereses por mora.
+
+### 3. Reportes de Deuda y Estadísticas
+- **Reporte de Deudores:** Listado de unidades morosas basado en `liquidaciones_detalles` cruzado con las `cobranzas`.
+- **Reporte de Proveedores:** Compromisos y gastos pendientes agrupados por proveedor.
+- **Estadísticas de Gestión:** KPIs y gráficos visuales (ej. tasa de cobrabilidad) en el dashboard administrativo principal.
+
+---
+
+## Plan de Ejecución
+1. Generar Modelos, Migraciones y Seeders Integrales (Fase 6).
+2. Desarrollar `SiroApiService` y Motor de Recargo (Fase 6).
+3. Construir el flujo de autenticación del Portal con validación de "Forzar Cambio de Clave" (Fase 6).
+4. Desarrollar la vista del Portal y PDF (Fase 6).
+5. Construir la pantalla de Conciliación (Fase 7).
+6. Construir los reportes Económicos, de Deuda y Estadísticas (Fase 7).
