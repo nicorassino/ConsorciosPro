@@ -9,15 +9,18 @@
                     {{ $isCreateMode ? 'Nuevo Presupuesto' : 'Presupuesto Mensual' }}
                 </h2>
             </div>
-            @if ($presupuesto)
-                @if ($canEdit)
-                    <button type="button" wire:click="finalize" wire:confirm="¿Finalizar este presupuesto? Luego se abrirá en modo solo lectura." class="bg-primary-900 hover:bg-primary-800 text-white px-4 py-2 rounded-lg text-sm font-semibold">
-                        <i class="fas fa-check-double mr-1"></i> Finalizar
-                    </button>
-                @else
-                    <span class="text-xs font-semibold bg-gray-100 text-gray-700 px-3 py-2 rounded-full">Solo lectura</span>
+            <div class="flex items-center gap-3">
+                @if ($presupuesto)
+                    @if ($canEdit)
+                        <button type="button" wire:click="finalize" wire:confirm="¿Finalizar este presupuesto? Luego se abrirá en modo solo lectura." class="bg-primary-900 hover:bg-primary-800 text-white px-4 py-2 rounded-lg text-sm font-semibold">
+                            <i class="fas fa-check-double mr-1"></i> Finalizar
+                        </button>
+                    @else
+                        <span class="text-xs font-semibold bg-gray-100 text-gray-700 px-3 py-2 rounded-full">Solo lectura</span>
+                    @endif
                 @endif
-            @endif
+                <x-user-menu />
+            </div>
         </div>
     </header>
 

@@ -2,13 +2,16 @@
     <header class="bg-white shadow-sm z-10 flex-shrink-0">
         <div class="flex items-center justify-between px-6 py-4">
             <h2 class="text-2xl font-bold text-gray-800">Consorcios</h2>
-            <button
-                type="button"
-                wire:click="openCreateModal"
-                class="bg-accent-600 hover:bg-accent-700 text-white px-4 py-2 rounded-lg font-medium shadow-sm transition-colors flex items-center gap-2"
-            >
-                <i class="fas fa-plus"></i> Nuevo Consorcio
-            </button>
+            <div class="flex items-center gap-3">
+                <button
+                    type="button"
+                    wire:click="openCreateModal"
+                    class="bg-accent-600 hover:bg-accent-700 text-white px-4 py-2 rounded-lg font-medium shadow-sm transition-colors flex items-center gap-2"
+                >
+                    <i class="fas fa-plus"></i> Nuevo Consorcio
+                </button>
+                <x-user-menu />
+            </div>
         </div>
     </header>
 

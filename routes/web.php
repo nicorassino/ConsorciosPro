@@ -3,6 +3,7 @@
 use App\Http\Controllers\PortalAuthController;
 use App\Http\Controllers\PortalDashboardController;
 use App\Http\Controllers\PortalPasswordController;
+use App\Livewire\Finanzas\ReporteIndex;
 use App\Livewire\Consorcios\ConsorcioIndex;
 use App\Livewire\Gastos\GastoEditor;
 use App\Livewire\Gastos\GastoIndex;
@@ -45,6 +46,9 @@ Route::middleware(['auth', 'verified', 'admin'])->group(function () {
     Route::get('gastos/{gasto}', GastoEditor::class)
         ->name('gastos.show');
 
+    Route::get('reportes', ReporteIndex::class)
+        ->name('reportes.index');
+
     Route::view('profile', 'profile')
         ->name('profile');
 });
@@ -70,7 +74,9 @@ Route::prefix('portal')->name('portal.')->group(function () {
     });
 
     Route::middleware(['auth:portal', 'force-password-change'])->group(function () {
-        Route::get('dashboard', PortalDashboardController::class)->name('dashboard');
+        Route::get('dashboard', [PortalDashboardController::class, 'index'])->name('dashboard');
+        Route::get('reglamento-y-notas', [PortalDashboardController::class, 'notes'])->name('notes');
+        Route::get('contacto', [PortalDashboardController::class, 'contact'])->name('contact');
     });
 });
 

@@ -3,6 +3,7 @@
         <header class="bg-white shadow-sm z-10 flex-shrink-0">
             <div class="flex items-center justify-between px-6 py-4">
                 <h2 class="text-2xl font-bold text-gray-800">Perfil</h2>
+                <x-user-menu />
             </div>
         </header>
 

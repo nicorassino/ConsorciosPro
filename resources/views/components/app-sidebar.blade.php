@@ -1,10 +1,13 @@
 @props(['active' => null])
 
 <aside {{ $attributes->merge(['class' => 'w-64 bg-primary-900 text-white flex flex-col shadow-2xl flex-shrink-0 z-20 hidden md:flex']) }}>
-    <div class="p-6 flex items-center justify-center border-b border-primary-800/50">
-        <div class="flex flex-col items-center">
-            <div class="h-10 w-10 bg-white rounded-lg flex items-center justify-center mb-2 shadow-md text-primary-900 font-bold text-xl">CP</div>
-            <h1 class="text-xl font-bold tracking-wider text-white">Consorcios<span class="text-accent-500">Pro</span></h1>
+    <div class="px-3 py-2 flex items-center justify-center border-b border-primary-800/60">
+        <div class="rounded-lg bg-white/95 px-2 py-1 shadow-md ring-1 ring-white/70">
+            <img
+                src="{{ asset('img/2.png') }}"
+                alt="NR Sistemas"
+                class="h-20 w-auto max-w-[220px] object-contain"
+            >
         </div>
     </div>
 
@@ -21,7 +24,7 @@
                 ])
             >
                 <i class="fas fa-home text-lg @if($active !== 'dashboard') group-hover:text-amber-400 @endif transition-colors"></i>
-                <span class="font-medium">Dashboard</span>
+                <span class="font-medium">Inicio</span>
             </a>
 
             <a
@@ -92,29 +95,20 @@
                 <i class="fas fa-receipt text-lg @if($active !== 'gastos') group-hover:text-orange-400 @endif transition-colors"></i>
                 <span class="font-medium">Gastos y Facturas</span>
             </a>
+
+            <a
+                href="{{ route('reportes.index') }}"
+                wire:navigate
+                @class([
+                    'flex items-center gap-3 px-3 py-2.5 rounded-lg group transition-colors',
+                    'bg-accent-600/20 text-accent-500 border-r-4 border-accent-500' => $active === 'reportes',
+                    'text-gray-300 hover:bg-primary-800 hover:text-white' => $active !== 'reportes',
+                ])
+            >
+                <i class="fas fa-chart-line text-lg @if($active !== 'reportes') group-hover:text-cyan-400 @endif transition-colors"></i>
+                <span class="font-medium">Reportes y Conciliación</span>
+            </a>
         </nav>
     </div>
 
-    @auth
-        <div class="p-4 border-t border-primary-800/50 text-sm">
-            <p class="text-gray-400 text-xs truncate mb-1" title="{{ auth()->user()->email }}">{{ auth()->user()->name }}</p>
-            <a href="{{ route('profile') }}" wire:navigate class="block text-gray-300 hover:text-white mb-2">
-                <i class="fas fa-user-circle mr-2"></i>Perfil
-            </a>
-            <form method="POST" action="{{ route('logout') }}">
-                @csrf
-                <button type="submit" class="text-gray-300 hover:text-white text-left w-full">
-                    <i class="fas fa-sign-out-alt mr-2"></i>Salir
-                </button>
-            </form>
-        </div>
-    @endauth
-
-    <div class="p-4 border-t border-primary-800/50 bg-primary-800/20 flex justify-center">
-        <img
-            src="{{ asset('img/logo_cliente.png') }}"
-            alt="Cliente"
-            class="h-20 w-auto max-w-[95%] object-contain bg-white rounded-xl p-3 shadow-sm hover:scale-105 transition-transform"
-        >
-    </div>
 </aside>

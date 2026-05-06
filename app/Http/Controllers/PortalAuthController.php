@@ -29,7 +29,12 @@ class PortalAuthController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect()->route('portal.dashboard');
+        $portalUser = Auth::guard('portal')->user();
+        $redirectRoute = $portalUser?->must_change_password
+            ? 'portal.password.edit'
+            : 'portal.dashboard';
+
+        return redirect()->intended(route($redirectRoute));
     }
 
     public function destroy(Request $request): RedirectResponse

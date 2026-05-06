@@ -5,9 +5,12 @@
                 <h2 class="text-2xl font-bold text-gray-800">{{ $isCreateMode ? 'Nuevo gasto' : 'Editar gasto' }}</h2>
                 <p class="text-sm text-gray-500 mt-1">Carga de comprobantes con reparto por conceptos del presupuesto.</p>
             </div>
-            <a href="{{ route('gastos.index') }}" wire:navigate class="text-sm font-semibold text-gray-600 hover:text-gray-800">
-                <i class="fas fa-arrow-left mr-1"></i> Volver al listado
-            </a>
+            <div class="flex items-center gap-3">
+                <a href="{{ route('gastos.index') }}" wire:navigate class="text-sm font-semibold text-gray-600 hover:text-gray-800">
+                    <i class="fas fa-arrow-left mr-1"></i> Volver al listado
+                </a>
+                <x-user-menu />
+            </div>
         </div>
     </header>
 

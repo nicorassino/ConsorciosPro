@@ -2,11 +2,14 @@
     <header class="bg-white shadow-sm z-10 flex-shrink-0">
         <div class="flex items-center justify-between px-6 py-4">
             <h2 class="text-2xl font-bold text-gray-800">Liquidaciones</h2>
-            @if ($selectedPresupuesto)
-                <button type="button" wire:click="clearSelection" class="text-sm font-semibold text-gray-600 hover:text-gray-800">
-                    <i class="fas fa-arrow-left mr-1"></i> Cambiar presupuesto
-                </button>
-            @endif
+            <div class="flex items-center gap-3">
+                @if ($selectedPresupuesto)
+                    <button type="button" wire:click="clearSelection" class="text-sm font-semibold text-gray-600 hover:text-gray-800">
+                        <i class="fas fa-arrow-left mr-1"></i> Cambiar presupuesto
+                    </button>
+                @endif
+                <x-user-menu />
+            </div>
         </div>
     </header>
 
